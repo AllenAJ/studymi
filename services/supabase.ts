@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Supabase configuration
-const SUPABASE_URL = 'https://btflulvuxmagndqssjhj.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0Zmx1bHZ1eG1hZ25kcXNzamhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMTUxOTYsImV4cCI6MjA4MDY5MTE5Nn0.F73752h4qHda0TKucURdizyjbQyZYzcx2aNotHSQASY';
+// Supabase configuration - read from environment variables
+const SUPABASE_URL = (import.meta as any).env?.VITE_SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || '';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -124,6 +124,33 @@ export const deleteStudySet = async (studySetId: string) => {
     .from('study_sets')
     .delete()
     .eq('id', studySetId);
+  return { error };
+};
+
+export const deleteAllStudySets = async (userId: string) => {
+  const { error } = await supabase
+    .from('study_sets')
+    .delete()
+    .eq('user_id', userId);
+  return { error };
+};
+
+export const submitFeedback = async (userId: string, rating: number, text: string) => {
+  const { data, error } = await supabase
+    .from('feedback')
+    .insert({
+      user_id: userId,
+      rating,
+      text,
+    })
+    .select()
+    .single();
+  return { data, error };
+};
+
+export const deleteUserAccount = async () => {
+  // Sign out - actual account deletion would need admin API
+  const { error } = await supabase.auth.signOut();
   return { error };
 };
 

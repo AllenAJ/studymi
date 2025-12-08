@@ -52,13 +52,24 @@ CREATE TABLE study_sets (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Feedback table
+CREATE TABLE feedback (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  text TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Create indexes for better performance
 CREATE INDEX idx_study_sets_user_id ON study_sets(user_id);
 CREATE INDEX idx_study_sets_created_at ON study_sets(created_at DESC);
+CREATE INDEX idx_feedback_user_id ON feedback(user_id);
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE study_sets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for profiles
 CREATE POLICY "Users can view their own profile"
@@ -88,6 +99,15 @@ CREATE POLICY "Users can update their own study sets"
 
 CREATE POLICY "Users can delete their own study sets"
   ON study_sets FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- RLS Policies for feedback
+CREATE POLICY "Users can insert their own feedback"
+  ON feedback FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can view their own feedback"
+  ON feedback FOR SELECT
   USING (auth.uid() = user_id);
 
 -- Function to handle profile creation on signup (with error handling)
