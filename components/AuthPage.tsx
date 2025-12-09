@@ -61,7 +61,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onComplete, onBack }) => {
     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 animate-fade-in relative">
       <button 
         onClick={onBack}
-        className="absolute top-8 left-8 p-3 rounded-full hover:bg-iceGray transition-colors"
+        className="absolute top-8 left-8 p-3 rounded-none hover:bg-iceGray transition-colors"
       >
         <ArrowLeft className="w-6 h-6 text-deepNavy" />
       </button>
@@ -79,7 +79,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onComplete, onBack }) => {
         </div>
 
         {error && (
-          <div className={`mb-6 p-4 rounded-2xl text-sm font-medium ${
+          <div className={`mb-6 p-4 rounded-none text-sm font-medium ${
             error.includes('Check your email') 
               ? 'bg-green-50 text-green-700 border border-green-200' 
               : 'bg-red-50 text-red-700 border border-red-200'
@@ -95,7 +95,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onComplete, onBack }) => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-6 py-4 bg-iceGray rounded-[20px] border border-transparent focus:border-primaryGold focus:bg-white outline-none transition-all"
+              className="w-full px-6 py-4 bg-iceGray rounded-none border border-transparent focus:border-primaryGold focus:bg-white outline-none transition-all"
               placeholder="name@example.com"
               required
             />
@@ -107,7 +107,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onComplete, onBack }) => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-6 py-4 bg-iceGray rounded-[20px] border border-transparent focus:border-primaryGold focus:bg-white outline-none transition-all"
+              className="w-full px-6 py-4 bg-iceGray rounded-none border border-transparent focus:border-primaryGold focus:bg-white outline-none transition-all"
               placeholder="••••••••"
               required
               minLength={6}
@@ -117,7 +117,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onComplete, onBack }) => {
           <button 
             type="submit"
             disabled={isLoading}
-            className="w-full mt-10 bg-deepNavy text-white py-4 rounded-full font-bold text-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-deepNavy/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full mt-10 bg-deepNavy text-white py-4 rounded-none font-bold text-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-deepNavy/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -141,7 +141,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onComplete, onBack }) => {
 
           <button 
             onClick={handleGoogleSignIn}
-            className="mt-6 flex items-center justify-center gap-3 w-full border border-softBorder hover:border-steelGray py-3.5 rounded-full transition-colors"
+            className="mt-6 flex items-center justify-center gap-3 w-full border border-softBorder hover:border-steelGray py-3.5 rounded-none transition-colors"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>

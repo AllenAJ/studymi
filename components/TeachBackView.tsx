@@ -29,9 +29,9 @@ export const TeachBackView: React.FC<TeachBackViewProps> = ({ studySet }) => {
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-slide-up">
       {!feedback ? (
-        <div className="bg-white dark:bg-darkCard rounded-[40px] shadow-soft border border-softBorder dark:border-darkBorder p-8 md:p-14 relative overflow-hidden">
+        <div className="bg-white dark:bg-darkCard rounded-none shadow-soft border border-softBorder dark:border-darkBorder p-8 md:p-14 relative overflow-hidden">
           <div className="mb-10 max-w-2xl">
-            <div className="w-16 h-16 bg-iceGray dark:bg-darkBorder rounded-full flex items-center justify-center mb-6">
+            <div className="w-16 h-16 bg-iceGray dark:bg-darkBorder rounded-none flex items-center justify-center mb-6">
                 <MessageSquare className="w-8 h-8 text-deepNavy dark:text-white" />
             </div>
             <h2 className="text-3xl font-bold text-deepNavy dark:text-white mb-3">teach it back</h2>
@@ -42,7 +42,7 @@ export const TeachBackView: React.FC<TeachBackViewProps> = ({ studySet }) => {
 
           <div className="relative">
             <textarea
-              className="w-full h-80 p-8 bg-iceGray dark:bg-darkBg border border-transparent rounded-[32px] focus:ring-4 focus:ring-primaryGold/20 focus:bg-white dark:focus:bg-darkCard focus:border-softBorder dark:focus:border-darkBorder outline-none resize-none text-deepNavy dark:text-white text-xl leading-relaxed placeholder:text-steelGray/40 transition-all shadow-inner"
+              className="w-full h-80 p-8 bg-iceGray dark:bg-darkBg border border-transparent rounded-none focus:ring-4 focus:ring-primaryGold/20 focus:bg-white dark:focus:bg-darkCard focus:border-softBorder dark:focus:border-darkBorder outline-none resize-none text-deepNavy dark:text-white text-xl leading-relaxed placeholder:text-steelGray/40 transition-all shadow-inner"
               placeholder="start typing your explanation here..."
               value={explanation}
               onChange={(e) => setExplanation(e.target.value)}
@@ -52,7 +52,7 @@ export const TeachBackView: React.FC<TeachBackViewProps> = ({ studySet }) => {
               <button
                 onClick={handleSubmit}
                 disabled={isGrading || !explanation.trim()}
-                className="bg-deepNavy dark:bg-white text-white dark:text-deepNavy h-16 w-16 rounded-full shadow-xl flex items-center justify-center hover:scale-110 transition-transform disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primaryGold hover:text-white dark:hover:bg-primaryGold dark:hover:text-white"
+                className="bg-deepNavy dark:bg-white text-white dark:text-deepNavy h-16 w-16 rounded-none shadow-xl flex items-center justify-center hover:scale-110 transition-transform disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primaryGold hover:text-white dark:hover:bg-primaryGold dark:hover:text-white"
               >
                 {isGrading ? <Loader2 className="w-8 h-8 animate-spin" /> : <Send className="w-8 h-8 ml-1" />}
               </button>
@@ -62,7 +62,7 @@ export const TeachBackView: React.FC<TeachBackViewProps> = ({ studySet }) => {
       ) : (
         <div className="space-y-6 animate-fade-in">
           {/* Score Card */}
-          <div className="bg-white dark:bg-darkCard rounded-[40px] shadow-soft border border-softBorder dark:border-darkBorder p-8 md:p-12 flex flex-col md:flex-row items-center gap-16">
+          <div className="bg-white dark:bg-darkCard rounded-none shadow-soft border border-softBorder dark:border-darkBorder p-8 md:p-12 flex flex-col md:flex-row items-center gap-16">
             <div className="relative w-48 h-48 flex-shrink-0">
                <svg className="w-full h-full transform -rotate-90">
                  <circle cx="96" cy="96" r="88" stroke="#DDE3EA" strokeWidth="16" fill="none" className="dark:stroke-darkBorder" />
@@ -92,7 +92,7 @@ export const TeachBackView: React.FC<TeachBackViewProps> = ({ studySet }) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Missing Concepts */}
-            <div className="bg-[#FFF8F8] dark:bg-red-900/10 rounded-[40px] p-10 border border-red-100 dark:border-red-900/20">
+            <div className="bg-[#FFF8F8] dark:bg-red-900/10 rounded-none p-10 border border-red-100 dark:border-red-900/20">
               <h4 className="font-bold text-red-900 dark:text-red-400 mb-8 flex items-center gap-3 text-lg">
                 <AlertCircle className="w-6 h-6" /> missed concepts
               </h4>
@@ -100,7 +100,7 @@ export const TeachBackView: React.FC<TeachBackViewProps> = ({ studySet }) => {
                 {feedback.missingConcepts.length > 0 ? (
                   feedback.missingConcepts.map((concept, i) => (
                     <li key={i} className="flex items-start gap-3 text-red-800/80 dark:text-red-300 font-medium">
-                      <div className="w-2 h-2 rounded-full bg-red-400 mt-2 flex-shrink-0" />
+                      <div className="w-2 h-2 rounded-none bg-red-400 mt-2 flex-shrink-0" />
                       {concept}
                     </li>
                   ))
@@ -111,7 +111,7 @@ export const TeachBackView: React.FC<TeachBackViewProps> = ({ studySet }) => {
             </div>
 
             {/* Model Correction */}
-            <div className="bg-[#FFFBEB] dark:bg-yellow-900/10 rounded-[40px] p-10 border border-yellow-100 dark:border-yellow-900/20">
+            <div className="bg-[#FFFBEB] dark:bg-yellow-900/10 rounded-none p-10 border border-yellow-100 dark:border-yellow-900/20">
               <h4 className="font-bold text-deepNavy dark:text-white mb-8 flex items-center gap-3 text-lg">
                 <CheckCircle2 className="w-6 h-6 text-primaryGold" /> simpler version
               </h4>
@@ -124,7 +124,7 @@ export const TeachBackView: React.FC<TeachBackViewProps> = ({ studySet }) => {
           <div className="flex justify-center pt-12 pb-8">
             <button 
               onClick={() => { setFeedback(null); setExplanation(''); }}
-              className="px-10 py-4 rounded-full border-2 border-softBorder dark:border-darkBorder text-deepNavy dark:text-white font-bold hover:bg-deepNavy dark:hover:bg-white hover:text-white dark:hover:text-deepNavy hover:border-deepNavy dark:hover:border-white transition-colors text-lg"
+              className="px-10 py-4 rounded-none border-2 border-softBorder dark:border-darkBorder text-deepNavy dark:text-white font-bold hover:bg-deepNavy dark:hover:bg-white hover:text-white dark:hover:text-deepNavy hover:border-deepNavy dark:hover:border-white transition-colors text-lg"
             >
               try another explanation
             </button>

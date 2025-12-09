@@ -8,9 +8,10 @@ import { Dashboard } from './components/Dashboard';
 import { StudyView } from './components/StudyView';
 import { Onboarding, OnboardingData } from './components/Onboarding';
 import { LegalPage } from './components/LegalPage';
+import { PricingPage } from './components/PricingPage';
 import { User } from '@supabase/supabase-js';
 
-type ViewType = 'loading' | 'landing' | 'auth' | 'onboarding' | 'dashboard' | 'study' | 'privacy' | 'terms' | 'disclaimer';
+type ViewType = 'loading' | 'landing' | 'auth' | 'onboarding' | 'dashboard' | 'study' | 'privacy' | 'terms' | 'disclaimer' | 'refund' | 'pricing';
 
 const App: React.FC = () => {
   // Check URL for legal pages on initial load
@@ -19,13 +20,16 @@ const App: React.FC = () => {
     if (path === '/privacy') return 'privacy';
     if (path === '/terms') return 'terms';
     if (path === '/disclaimer') return 'disclaimer';
+    if (path === '/refund') return 'refund';
+    if (path === '/pricing') return 'pricing';
     return 'loading';
   };
 
   const [view, setView] = useState<ViewType>(getInitialView());
   const [user, setUser] = useState<User | null>(null);
   const [userName, setUserName] = useState('');
-  const [userVibe, setUserVibe] = useState('focused');
+  const [userVibe, setUserVibe] = useState<'focused' | 'chill'>('focused');
+  const [isPremium, setIsPremium] = useState(false);
   const [currentSet, setCurrentSet] = useState<StudySet | null>(null);
   const [history, setHistory] = useState<StudySet[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -37,6 +41,8 @@ const App: React.FC = () => {
       if (path === '/privacy') setView('privacy');
       else if (path === '/terms') setView('terms');
       else if (path === '/disclaimer') setView('disclaimer');
+      else if (path === '/refund') setView('refund');
+      else if (path === '/pricing') setView('pricing');
       else if (path === '/' || path === '') {
         // Return to appropriate view based on auth state
         if (user) setView('dashboard');
@@ -63,8 +69,8 @@ const App: React.FC = () => {
 
   // Check auth state on mount
   useEffect(() => {
-    // Skip auth redirect if on legal pages
-    const isLegalPage = view === 'privacy' || view === 'terms' || view === 'disclaimer';
+    // Skip auth redirect if on legal pages or pricing
+    const isLegalPage = ['privacy', 'terms', 'disclaimer', 'refund', 'pricing'].includes(view);
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -207,7 +213,10 @@ const App: React.FC = () => {
             console.error('Supabase save error:', result.error);
           } else if (result?.data) {
             console.log('Saved successfully:', result.data.id);
+            // Update the set with the real ID from database
             newSet.id = result.data.id;
+            // Force update history with the new ID to ensure consistent state
+            setHistory(prev => prev.map(s => s.createdAt === newSet.createdAt ? { ...s, id: result.data.id } : s));
           }
         } catch (saveError: any) {
           console.error('Save failed:', saveError?.message || saveError);
@@ -275,7 +284,7 @@ const App: React.FC = () => {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-accentYellow animate-pulse"></div>
+          <div className="w-12 h-12 rounded-none bg-accentYellow animate-pulse"></div>
           <p className="text-steelGray font-medium">Loading...</p>
         </div>
       </div>
@@ -293,7 +302,7 @@ const App: React.FC = () => {
   if (view === 'dashboard') {
     return (
       <Dashboard
-        user={userName || 'Friend'}
+        user={user}
         onProcess={handleProcess}
         isProcessing={isProcessing}
         onLogout={handleLogout}
@@ -304,6 +313,7 @@ const App: React.FC = () => {
         onResetHistory={handleResetHistory}
         onDeleteAccount={handleDeleteAccount}
         initialGenZMode={userVibe === 'chill'}
+        isPremium={isPremium}
       />
     );
   }
@@ -322,6 +332,14 @@ const App: React.FC = () => {
 
   if (view === 'disclaimer') {
     return <LegalPage type="disclaimer" onBack={handleLegalBack} />;
+  }
+
+  if (view === 'refund') {
+    return <LegalPage type="refund" onBack={handleLegalBack} />;
+  }
+
+  if (view === 'pricing') {
+    return <PricingPage onBack={handleLegalBack} />;
   }
 
   return <LandingPage onStart={handleStart} />;
