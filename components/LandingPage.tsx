@@ -272,7 +272,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
             {[
               { q: "what is studymi?", a: "it's an intelligent learning companion that helps you understand complex topics by teaching them back to you, quizzing you, and creating study aids." },
               { q: "how does studymi work?", a: "simply upload your notes, audio, or just type a topic. studymi analyzes it and creates a personalized study plan with flashcards, mind maps, and quizzes." },
-              { q: "is studymi a replacement for traditional therapy?", a: "no, studymi is an educational tool designed for learning and study support, not a medical or psychological service." },
+              { q: "can studymi help right before an exam?", a: "yes. it can generate rapid-revision summaries, quick quizzes, and focused study sets that help you absorb the essentials fast." },
               { q: "is my data secure and confidential?", a: "absolutely. your data is encrypted and private. we do not share your personal study materials with anyone." },
               { q: "does studymi support multiple languages?", a: "yes! studymi can process and communicate in multiple languages to support your learning journey." }
             ].map((item, i) => (
