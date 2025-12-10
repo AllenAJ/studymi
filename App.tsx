@@ -30,6 +30,7 @@ const App: React.FC = () => {
   const [userName, setUserName] = useState('');
   const [userVibe, setUserVibe] = useState<'focused' | 'chill'>('focused');
   const [isPremium, setIsPremium] = useState(false);
+  const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
   const [currentSet, setCurrentSet] = useState<StudySet | null>(null);
   const [history, setHistory] = useState<StudySet[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -109,6 +110,9 @@ const App: React.FC = () => {
     if (profile?.name) {
       setUserName(profile.name);
       setUserVibe(profile.vibe || 'focused');
+      // Fix: Load premium status from profile
+      setIsPremium(profile.is_premium || false);
+      setSubscriptionId(profile.subscription_id || null);
 
       // Load study sets
       const { data: studySets } = await getStudySets(userId);
@@ -142,6 +146,9 @@ const App: React.FC = () => {
     if (profile?.name) {
       setUserName(profile.name);
       setUserVibe(profile.vibe || 'focused');
+      // Fix: Load premium status from profile
+      setIsPremium(profile.is_premium || false);
+      setSubscriptionId(profile.subscription_id || null);
 
       // Load study sets
       const { data: studySets } = await getStudySets(userId);
@@ -314,6 +321,7 @@ const App: React.FC = () => {
         onDeleteAccount={handleDeleteAccount}
         initialGenZMode={userVibe === 'chill'}
         isPremium={isPremium}
+        subscriptionId={subscriptionId}
       />
     );
   }
