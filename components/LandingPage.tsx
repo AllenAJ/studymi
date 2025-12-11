@@ -91,39 +91,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           {/* Soft decorative blob behind */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-iceGray/50 rounded-none blur-3xl -z-10 opacity-60"></div>
 
-          <div className="bg-white rounded-none shadow-2xl shadow-deepNavy/5 border border-softBorder p-8 md:p-16 flex flex-col items-center text-center relative overflow-hidden transition-transform hover:scale-[1.01] duration-700">
-
-            {/* Connecting State */}
-            <div className="flex flex-col items-center gap-8 mb-12">
-              <p className="text-xs font-bold text-steelGray uppercase tracking-widest animate-pulse">connecting...</p>
-
-              {/* The Yellow Dot Avatar */}
-              <div className="w-32 h-32 md:w-40 md:h-40 rounded-none bg-accentYellow shadow-[0_20px_40px_rgba(255,204,0,0.2)] flex items-center justify-center animate-pulse-slow relative">
-                <div className="absolute inset-0 bg-white/20 rounded-none animate-ping opacity-20"></div>
-              </div>
-
-              <div className="space-y-2 max-w-md">
-                <p className="text-xl md:text-2xl font-bold text-deepNavy leading-tight">
-                  okay, so it sounds like you're feeling pretty shook about that physics exam.
-                </p>
-                <p className="text-steelGray text-lg">what's been going on?</p>
-              </div>
-            </div>
-
-            {/* Fake Controls */}
-            <div className="flex items-center gap-6">
-              <button className="w-14 h-14 rounded-none bg-iceGray hover:bg-softBorder transition-colors flex items-center justify-center text-deepNavy">
-                <Volume2 className="w-6 h-6" />
-              </button>
-
-              <button className="w-16 h-16 rounded-none bg-accentYellow hover:scale-105 transition-transform shadow-lg shadow-yellow-200 flex items-center justify-center text-deepNavy">
-                <div className="w-4 h-4 bg-deepNavy rounded-none"></div>
-              </button>
-
-              <button className="w-14 h-14 rounded-none bg-iceGray hover:bg-softBorder transition-colors flex items-center justify-center text-deepNavy">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
+          <div className="bg-white rounded-none shadow-2xl shadow-deepNavy/5 border border-softBorder p-2 flex flex-col items-center text-center relative overflow-hidden transition-transform hover:scale-[1.01] duration-700">
+            <video autoPlay loop muted playsInline className="w-full h-full object-cover rounded-none">
+              <source src="/vid/compressed/main1.mp4" type="video/mp4" />
+            </video>
           </div>
         </div>
 
@@ -160,11 +131,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               </div>
 
               {/* Image Placeholder */}
-              <div className="w-full aspect-video bg-iceGray rounded-none flex items-center justify-center border-2 border-dashed border-softBorder overflow-hidden group-hover:border-primaryGold/30 transition-colors">
-                <div className="flex flex-col items-center gap-2 opacity-30">
-                  <div className="w-12 h-12 bg-steelGray rounded-none"></div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-steelGray">Image Placeholder</span>
-                </div>
+              <div className="w-full aspect-video bg-iceGray rounded-none flex items-center justify-center border-none overflow-hidden group-hover:border-primaryGold/30 transition-colors">
+                <video autoPlay loop muted playsInline className="w-full h-full object-cover">
+                  <source src="/vid/compressed/transcibe.mp4" type="video/mp4" />
+                </video>
               </div>
             </div>
 
@@ -175,19 +145,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                   <Globe className="w-6 h-6 text-primaryGold" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-deepNavy mb-3 lowercase">100+ Languages</h3>
+                  <h3 className="text-2xl font-bold text-deepNavy mb-3 lowercase">Gen Z Mode</h3>
                   <p className="text-steelGray text-base leading-relaxed">
-                    We support 100+ languages, so you can record and transcribe in your language.
+                    Because why not? Studying can be fun.
                   </p>
                 </div>
               </div>
 
               {/* Image Placeholder */}
-              <div className="w-full aspect-video bg-iceGray rounded-none flex items-center justify-center border-2 border-dashed border-softBorder overflow-hidden group-hover:border-primaryGold/30 transition-colors">
-                <div className="flex flex-col items-center gap-2 opacity-30">
-                  <div className="w-12 h-12 bg-steelGray rounded-none"></div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-steelGray">Image Placeholder</span>
-                </div>
+              <div className="w-full aspect-video bg-iceGray rounded-none flex items-center justify-center border-none overflow-hidden group-hover:border-primaryGold/30 transition-colors">
+                <video autoPlay loop muted playsInline className="w-full h-full object-cover">
+                  <source src="/vid/compressed/genz.mp4" type="video/mp4" />
+                </video>
               </div>
             </div>
 
@@ -198,19 +167,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                   <FileText className="w-6 h-6 text-deepNavy" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-deepNavy mb-3 lowercase">Summaries & Insights</h3>
+                  <h3 className="text-2xl font-bold text-deepNavy mb-3 lowercase">Remembers Everything</h3>
                   <p className="text-steelGray text-base leading-relaxed">
-                    Generate summaries and insights from your notes to help easy and fast memorize the content.
+                    Studymi keeps your whole story in mind. It learns from every conversation, getting to know you better.
                   </p>
                 </div>
               </div>
 
               {/* Image Placeholder */}
-              <div className="w-full aspect-video bg-iceGray rounded-none flex items-center justify-center border-2 border-dashed border-softBorder overflow-hidden group-hover:border-primaryGold/30 transition-colors">
-                <div className="flex flex-col items-center gap-2 opacity-30">
-                  <div className="w-12 h-12 bg-steelGray rounded-none"></div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-steelGray">Image Placeholder</span>
-                </div>
+              <div className="w-full aspect-video bg-iceGray rounded-none flex items-center justify-center border-none overflow-hidden group-hover:border-primaryGold/30 transition-colors">
+                <video autoPlay loop muted playsInline className="w-full h-full object-cover">
+                  <source src="/vid/compressed/insightshistory.mp4" type="video/mp4" />
+                </video>
               </div>
             </div>
 
@@ -221,19 +189,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                   <Layers className="w-6 h-6 text-accentYellow" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-deepNavy mb-3 lowercase">Quizzes & Flashcards</h3>
+                  <h3 className="text-2xl font-bold text-deepNavy mb-3 lowercase">Mindmaps, Quizzes & Flashcards</h3>
                   <p className="text-steelGray text-base leading-relaxed">
-                    Generate quizzes and flashcards from your notes to help you learn and memorize the content.
+                    Generate mindmaps, quizzes and flashcards from your notes to help you learn and memorize the content.
                   </p>
                 </div>
               </div>
 
               {/* Image Placeholder */}
-              <div className="w-full aspect-video bg-iceGray rounded-none flex items-center justify-center border-2 border-dashed border-softBorder overflow-hidden group-hover:border-primaryGold/30 transition-colors">
-                <div className="flex flex-col items-center gap-2 opacity-30">
-                  <div className="w-12 h-12 bg-steelGray rounded-none"></div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-steelGray">Image Placeholder</span>
-                </div>
+              <div className="w-full aspect-video bg-iceGray rounded-none flex items-center justify-center border-none overflow-hidden group-hover:border-primaryGold/30 transition-colors">
+                <video autoPlay loop muted playsInline className="w-full h-full object-cover">
+                  <source src="/vid/compressed/mindmap.mp4" type="video/mp4" />
+                </video>
               </div>
             </div>
           </div>
