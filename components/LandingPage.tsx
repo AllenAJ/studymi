@@ -37,7 +37,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
   return (
     <div className="min-h-screen bg-white text-deepNavy font-sans overflow-x-hidden selection:bg-primaryGold selection:text-white">
       {/* Background Dots */}
-      <div className="fixed inset-0 pointer-events-none z-0" style={{
+      <div className="fixed inset-0 pointer-events-none -z-10" style={{
         backgroundImage: 'radial-gradient(#e5e7eb 1.2px, transparent 1px)',
         backgroundSize: '24px 24px'
       }}></div>
@@ -99,12 +99,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         </div>
 
         {/* Partner Logos */}
-        <div className="mt-24 flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-40 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500">
-          <img src="/studentsat/harvard.webp" alt="Harvard" className="h-16 w-auto object-contain" />
-          <img src="/studentsat/mit.webp" alt="MIT" className="h-16 w-auto object-contain" />
-          <img src="/studentsat/sanford.webp" alt="Stanford" className="h-16 w-auto object-contain" />
-          <img src="/studentsat/university-of-chicago.webp" alt="UChicago" className="h-16 w-auto object-contain" />
-          <img src="/studentsat/Yale-Logo.webp" alt="Yale" className="h-16 w-auto object-contain" />
+        <div className="mt-24 flex flex-col items-center gap-8">
+          <p className="text-xs text-steelGray/60 font-bold tracking-widest uppercase">trusted by students at</p>
+          <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-40 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500">
+            <img src="/studentsat/harvard.webp" alt="Harvard" className="h-16 w-auto object-contain" />
+            <img src="/studentsat/mit.webp" alt="MIT" className="h-16 w-auto object-contain" />
+            <img src="/studentsat/sanford.webp" alt="Stanford" className="h-16 w-auto object-contain" />
+            <img src="/studentsat/university-of-chicago.webp" alt="UChicago" className="h-16 w-auto object-contain" />
+            <img src="/studentsat/Yale-Logo.webp" alt="Yale" className="h-16 w-auto object-contain" />
+          </div>
         </div>
       </section>
 
