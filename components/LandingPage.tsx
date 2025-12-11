@@ -37,7 +37,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
   return (
     <div className="min-h-screen bg-white text-deepNavy font-sans overflow-x-hidden selection:bg-primaryGold selection:text-white">
       {/* Background Dots */}
-      <div className="fixed inset-0 pointer-events-none -z-10" style={{
+      <div className="fixed inset-0 pointer-events-none z-0" style={{
         backgroundImage: 'radial-gradient(#e5e7eb 1.2px, transparent 1px)',
         backgroundSize: '24px 24px'
       }}></div>
@@ -60,7 +60,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
       </nav>
 
       {/* Hero Section */}
-      <section className="w-full max-w-[1200px] mx-auto px-6 pt-12 md:pt-20 pb-32 flex flex-col items-center text-center animate-slide-up relative">
+      <section className="w-full max-w-[1200px] mx-auto px-6 pt-12 md:pt-20 pb-32 flex flex-col items-center text-center animate-slide-up relative z-10">
 
         {/* Main Headings */}
         <h1 className="text-5xl md:text-[80px] leading-[0.95] font-extrabold text-deepNavy mb-8 tracking-tighter min-h-[1.9em]">
@@ -112,7 +112,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
       </section>
 
       {/* Features Grid */}
-      <section className="w-full bg-[#FAFAFA] py-32 border-t border-softBorder/60">
+      <section className="w-full bg-[#FAFAFA] py-32 border-t border-softBorder/60 relative z-10">
         <div className="max-w-[1200px] mx-auto px-6">
           <div className="mb-20 text-center">
             <h2 className="text-4xl font-extrabold text-deepNavy mb-4 lowercase">all the good stuff</h2>
@@ -211,7 +211,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
       </section>
 
       {/* Testimonials */}
-      <section className="w-full py-32 bg-white">
+      <section className="w-full py-32 bg-white relative z-10">
         <div className="max-w-[1200px] mx-auto px-6">
           <h2 className="text-4xl font-extrabold text-deepNavy text-center mb-20 lowercase">what people are saying</h2>
 
@@ -234,7 +234,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
       </section>
 
       {/* FAQ */}
-      <section className="w-full py-32 bg-white border-t border-softBorder/60">
+      <section className="w-full py-32 bg-white border-t border-softBorder/60 relative z-10">
         <div className="max-w-[800px] mx-auto px-6">
           <h2 className="text-4xl font-extrabold text-deepNavy text-center mb-20 lowercase">frequently asked questions</h2>
 
@@ -266,7 +266,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
       </section>
 
       {/* Footer */}
-      <footer className="w-full py-24 bg-white border-t border-softBorder">
+      <footer className="w-full py-24 bg-white border-t border-softBorder relative z-10">
         <div className="max-w-[1200px] mx-auto px-6 grid grid-cols-1 md:grid-cols-5 gap-12">
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-2 mb-6">
