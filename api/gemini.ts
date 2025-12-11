@@ -77,6 +77,12 @@ const TEACH_BACK_SCHEMA = {
     required: ["score", "feedback", "missingConcepts", "correction"]
 };
 
+import { getUser } from './_utils/auth';
+import { rateLimit } from './_utils/rate-limit';
+
+const ALLOWED_ACTIONS = ['generateStudySet', 'gradeTeachBack'];
+const MAX_PROMPT_LENGTH = 20000;
+
 export default async function handler(req: any, res: any) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -90,12 +96,37 @@ export default async function handler(req: any, res: any) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
+    // Security Check
+    const user = await getUser(req);
+    if (!user) {
+        return res.status(401).json({ error: 'Unauthorized: Please log in' });
+    }
+
+    // Rate Limit (ID-based for logged in users)
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const identifier = user.id || ip;
+
+    if (!rateLimit(identifier, 10, 60000)) { // 10 requests per minute
+        return res.status(429).json({ error: 'Too many requests. Please try again later.' });
+    }
+
+    const { action, prompt, isGenZ, inlineData } = req.body;
+
+    // Input Validation
+    if (!ALLOWED_ACTIONS.includes(action)) {
+        return res.status(400).json({ error: 'Invalid action' });
+    }
+
+    if (!prompt || typeof prompt !== 'string' || prompt.length > MAX_PROMPT_LENGTH) {
+        return res.status(400).json({ error: 'Invalid prompt: Too long or missing' });
+    }
+
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
         return res.status(500).json({ error: 'Gemini API key not configured' });
     }
 
-    const { action, prompt, isGenZ, inlineData } = req.body;
+
 
     const systemInstruction = isGenZ ? GEN_Z_SYSTEM_INSTRUCTION : BASE_SYSTEM_INSTRUCTION;
     const schema = action === 'gradeTeachBack' ? TEACH_BACK_SCHEMA : STUDY_SET_SCHEMA;

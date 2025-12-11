@@ -1,5 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { StudySet, TeachBackFeedback, InputType } from "../types";
+import { supabase } from "./supabase";
 
 // Check if we're in production (Vercel) or local dev
 const isProduction = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
@@ -25,9 +26,19 @@ Still ensure the educational content is 100% accurate and helpful.
 
 // For production, use server-side API route
 async function callGeminiServer(prompt: string, action: string, isGenZ: boolean, inlineData?: { mimeType: string; data: string }): Promise<any> {
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+
+  if (!token) {
+    throw new Error('You must be logged in to use this feature.');
+  }
+
   const response = await fetch('/api/gemini', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
     body: JSON.stringify({ action, prompt, isGenZ, inlineData })
   });
 
