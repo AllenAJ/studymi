@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, FileText, Sparkles, Clock, ThumbsUp, Home, ArrowRight, X, Star, Settings, Upload, Youtube, Moon, Sun, Crown, Info, Trash2, ToggleLeft, ToggleRight, Menu, BarChart2, Calendar, BookOpen, Layers, CheckCircle2, Lock } from 'lucide-react';
 import { InputType, StudySet } from '../types';
+import { supabase } from '../services/supabase';
 
 // Free tier limit
 // Free tier limit
@@ -388,9 +389,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const handleUpgrade = async () => {
     setIsCheckingOut(true);
     try {
+      // Get current session token
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
       const response = await fetch('/api/payment/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
         body: JSON.stringify({
           plan: isYearlyPlan ? 'yearly' : 'monthly',
           returnUrl: window.location.href,
