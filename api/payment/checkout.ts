@@ -8,8 +8,13 @@ export const config = {
 };
 
 export default async function handler(req: any, res: any) {
-    // CORS configuration
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    // CORS configuration - restrict to production domain
+    const allowedOrigins = ['https://studymi.xyz', 'https://www.studymi.xyz'];
+    const origin = req.headers.origin;
+
+    if (origin && allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    }
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 

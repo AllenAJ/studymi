@@ -40,19 +40,26 @@ export default async function handler(req: any, res: any) {
 
         console.log(`[Webhook] Received ${event.type}. Sig Header: ${!!signature}, Secret Configured: ${!!secret}`);
 
-        if (secret && signature) {
+        // SECURITY: ALWAYS require signature if secret is configured
+        if (secret) {
+            if (!signature) {
+                console.error('[Security] Missing Webhook Signature Header');
+                return res.status(401).json({ error: 'Missing signature' });
+            }
+
             // Compute HMAC SHA256 of the raw body
             const computed = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
 
-            // Allow for potential 't=...,v1=...' format or simple hash
-            // If the signature header contains the computed hash
+            // Dodo may use 't=...,v1=...' format or simple hash - check if computed hash is present
             if (!signature.includes(computed)) {
-                console.error('[Security] Invalid Webhook Signature', { received: signature, computed });
-                // FIXME: Uncomment next line after verifying signature format in production logs
-                // return res.status(401).json({ error: 'Invalid signature' });
-            } else {
-                console.log('[Security] Signature Verified ✅');
+                console.error('[Security] Invalid Webhook Signature', { received: signature.substring(0, 20) + '...', computed: computed.substring(0, 20) + '...' });
+                return res.status(401).json({ error: 'Invalid signature' });
             }
+
+            console.log('[Security] Signature Verified ✅');
+        } else {
+            // Log warning if no secret configured (should be configured in production)
+            console.warn('[Security] No DODO_PAYMENTS_WEBHOOK_SECRET configured - signature verification skipped');
         }
 
         if (!event || !event.type) {
