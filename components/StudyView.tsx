@@ -146,23 +146,13 @@ export const StudyView: React.FC<StudyViewProps> = ({ studySet, onBack }) => {
           {/* Content Area */}
           <div className="animate-fade-in pb-20">
             {activeTab === 'summary' && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 bg-white dark:bg-darkCard rounded-none p-8 md:p-10 border border-softBorder dark:border-darkBorder shadow-soft">
-                  <h2 className="text-2xl font-bold mb-8 flex items-center gap-3 dark:text-white text-deepNavy">
-                    <BookOpen className="w-6 h-6 text-primaryGold fill-primaryGold/20" />
-                    The Breakdown
-                  </h2>
-                  <div className="prose prose-lg text-deepNavy/80 dark:text-gray-300 leading-relaxed max-w-none">
-                    {studySet.summary}
-                  </div>
-                </div>
-
-                <div className="bg-deepNavy dark:bg-darkCard rounded-none p-8 md:p-10 text-white shadow-xl h-fit border border-transparent dark:border-darkBorder">
+              <div className="flex flex-col gap-8">
+                <div className="bg-deepNavy dark:bg-darkCard rounded-none p-8 md:p-10 text-white shadow-xl border border-transparent dark:border-darkBorder">
                   <h3 className="font-bold text-xl mb-8 flex items-center gap-3">
                     <div className="w-2 h-2 rounded-none bg-accentYellow"></div>
                     Key Concepts
                   </h3>
-                  <ul className="space-y-6">
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {studySet.keyConcepts.map((concept, i) => (
                       <li key={i} className="flex items-start gap-4 group">
                         <span className="font-mono text-primaryGold text-lg font-bold group-hover:text-white transition-colors">0{i + 1}</span>
@@ -170,6 +160,20 @@ export const StudyView: React.FC<StudyViewProps> = ({ studySet, onBack }) => {
                       </li>
                     ))}
                   </ul>
+                </div>
+
+                <div className="bg-white dark:bg-darkCard rounded-none p-8 md:p-10 border border-softBorder dark:border-darkBorder shadow-soft">
+                  <h2 className="text-2xl font-bold mb-8 flex items-center gap-3 dark:text-white text-deepNavy">
+                    <BookOpen className="w-6 h-6 text-primaryGold fill-primaryGold/20" />
+                    The Breakdown
+                  </h2>
+                  <div className="prose prose-lg text-deepNavy/80 dark:text-gray-300 leading-relaxed max-w-none prose-headings:text-deepNavy dark:prose-headings:text-white prose-strong:text-deepNavy dark:prose-strong:text-white prose-table:border-collapse prose-th:bg-black/5 dark:prose-th:bg-white/10 prose-th:p-3 prose-td:p-3 prose-td:border prose-td:border-softBorder dark:prose-td:border-darkBorder">
+                    {studySet.detailedNotes ? (
+                      <div dangerouslySetInnerHTML={{ __html: studySet.detailedNotes }} />
+                    ) : (
+                      studySet.summary
+                    )}
+                  </div>
                 </div>
               </div>
             )}
