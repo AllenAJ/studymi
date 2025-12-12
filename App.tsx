@@ -10,10 +10,13 @@ import { Onboarding, OnboardingData } from './components/Onboarding';
 import { LegalPage } from './components/LegalPage';
 import { PricingPage } from './components/PricingPage';
 import { User } from '@supabase/supabase-js';
+import { usePostHog } from 'posthog-js/react';
 
 type ViewType = 'loading' | 'landing' | 'auth' | 'onboarding' | 'dashboard' | 'study' | 'privacy' | 'terms' | 'disclaimer' | 'refund' | 'pricing';
 
 const App: React.FC = () => {
+  const posthog = usePostHog();
+
   // Check URL for legal pages on initial load
   const getInitialView = (): ViewType => {
     const path = window.location.pathname;
@@ -34,6 +37,13 @@ const App: React.FC = () => {
   const [currentSet, setCurrentSet] = useState<StudySet | null>(null);
   const [history, setHistory] = useState<StudySet[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Track page views
+  useEffect(() => {
+    if (posthog) {
+      posthog.capture('$pageview');
+    }
+  }, [view, posthog]);
 
   // Handle browser back/forward navigation and URL routing
   useEffect(() => {
@@ -77,6 +87,15 @@ const App: React.FC = () => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
+
+        // Identify user in PostHog
+        if (posthog) {
+          posthog.identify(session.user.id, {
+            email: session.user.email,
+            name: session.user.user_metadata?.full_name
+          });
+        }
+
         // Only load user data and redirect if not on a legal page
         if (!isLegalPage) {
           loadUserData(session.user.id);
@@ -91,12 +110,23 @@ const App: React.FC = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
         setUser(session.user);
+
+        // Identify user
+        if (posthog) {
+          posthog.identify(session.user.id, {
+            email: session.user.email,
+            name: session.user.user_metadata?.full_name
+          });
+          posthog.capture('auth_complete');
+        }
+
         loadUserData(session.user.id);
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
         setUserName('');
         setHistory([]);
         setView('landing');
+        if (posthog) posthog.reset();
       }
     });
 

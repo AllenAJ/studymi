@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Mic, FileText, Sparkles, Clock, ThumbsUp, Home, ArrowRight, X, Star, Settings, Upload, Youtube, Moon, Sun, Crown, Info, Trash2, ToggleLeft, ToggleRight, Menu, BarChart2, Calendar, BookOpen, Layers, CheckCircle2, Lock } from 'lucide-react';
 import { InputType, StudySet } from '../types';
 import { supabase } from '../services/supabase';
+import { usePostHog } from 'posthog-js/react';
 
 // Free tier limit
 // Free tier limit
@@ -159,6 +160,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   isPremium = false,
   subscriptionId
 }) => {
+  const posthog = usePostHog();
   const [activeTab, setActiveTab] = useState<'home' | 'insights' | 'settings' | 'history'>('home');
   const [activeModal, setActiveModal] = useState<'voice' | 'text' | 'upload' | 'link' | 'feedback' | 'confirmDelete' | 'confirmReset' | 'confirmDeleteAccount' | 'upgrade' | null>(null);
   const [textInput, setTextInput] = useState('');
@@ -388,6 +390,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const handleUpgrade = async () => {
     setIsCheckingOut(true);
+    if (posthog) posthog.capture('upgrade_clicked', { plan: isYearlyPlan ? 'yearly' : 'monthly' });
     try {
       // Get current session token
       const { data: { session } } = await supabase.auth.getSession();
@@ -410,11 +413,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Checkout failed');
-
       if (data.checkout_url) {
+        if (posthog) posthog.capture('checkout_started', { url: data.checkout_url });
         window.location.href = data.checkout_url;
       }
+
+      if (!response.ok) throw new Error(data.error || 'Checkout failed');
     } catch (error) {
       console.error('Upgrade failed:', error);
       alert('Failed to start checkout. Please try again.');
@@ -1302,15 +1306,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <p className="text-steelGray dark:text-darkMuted font-medium mb-6">Everything in free plan plus</p>
                   <div className="space-y-4">
                     {[
-                      "Unlimited note generations",
-                      "Unlimited audio or phone calls",
-                      "Unlimited podcasts and youtube videos",
-                      "Unlimited quiz and flashcards",
-                      "Support for 100+ languages",
-                      "Best-in-class Transcription and Summarization",
-                      "Customer support 24/7",
-                      "Priority Access to new features",
-                      "And more..."
+                      "Unlimited study sets",
+                      "Unlimited audio uploads",
+                      "Unlimited YouTube transcriptions",
+                      "Unlimited quizzes",
+                      "Prioritized support",
+                      "Early access to new features",
+                      "Advanced AI models"
                     ].map((feature, i) => (
                       <div key={i} className="flex items-center gap-3">
                         <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />

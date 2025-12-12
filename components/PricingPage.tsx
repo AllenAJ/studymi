@@ -87,11 +87,10 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onBack }) => {
 
                         <div className="flex-1 space-y-4 mb-8">
                             {[
-                                "Unlimited generations",
+                                "Unlimited study sets",
                                 "Unlimited audio & YouTube uploads",
                                 "Priority support",
                                 "Early access to new features",
-                                "100+ languages supported",
                                 "Advanced AI models"
                             ].map((feature, i) => (
                                 <div key={i} className="flex items-center gap-3">

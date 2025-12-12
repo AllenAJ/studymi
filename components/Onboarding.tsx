@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowRight, ArrowLeft, Check, Instagram, Youtube, Facebook, Search, BookOpen, GraduationCap, Code, Stethoscope, Briefcase, Brain, Languages, Sparkles, FileText, BookMarked, Play, Globe, StickyNote, TrendingUp, Target, Zap, Lightbulb, Trophy, PenTool, Users, Twitter } from 'lucide-react';
+import { usePostHog } from 'posthog-js/react';
 
 interface OnboardingProps {
   onComplete: (data: OnboardingData) => void;
@@ -18,6 +19,7 @@ export interface OnboardingData {
 }
 
 export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
+  const posthog = usePostHog();
   const [step, setStep] = useState(0);
   const [data, setData] = useState<OnboardingData>({
     name: '',
@@ -135,7 +137,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       <div className="w-full max-w-2xl mx-auto px-6 pt-8">
         <div className="flex items-center gap-4">
           {step > 0 && (
-            <button 
+            <button
               onClick={handleBack}
               className="p-2 -ml-2 hover:bg-iceGray rounded-none transition-colors"
             >
@@ -143,9 +145,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             </button>
           )}
           <div className="flex-1 h-1.5 bg-iceGray rounded-none overflow-hidden">
-            <div 
+            <div
               className="h-full bg-deepNavy rounded-none transition-all duration-500"
-              style={{ width: `${((step + 1) / totalSteps) * 100}%` }}
+              style={{ width: `${((step + 1) / totalSteps) * 100}% ` }}
             />
           </div>
         </div>
@@ -154,14 +156,14 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       {/* Content */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 animate-fade-in">
         <div className="w-full max-w-lg">
-          
+
           {/* Step 0: Welcome */}
           {step === 0 && (
             <div className="text-center animate-slide-up">
               <div className="w-16 h-16 rounded-none bg-accentYellow mx-auto mb-10 shadow-lg shadow-yellow-200/50"></div>
-              
+
               <h2 className="text-2xl font-bold text-deepNavy mb-6">hi friend</h2>
-              
+
               <p className="text-lg text-deepNavy mb-4">we created studymi because learning can be... a lot</p>
               <p className="text-lg text-steelGray mb-4">sometimes you just need a smarter way to study</p>
               <p className="text-lg text-steelGray mb-4">
@@ -169,9 +171,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 mastering a new skill,<br />
                 or just curious about the world
               </p>
-              
+
               <p className="text-xl font-bold text-deepNavy mt-8 mb-4">we're here for you</p>
-              
+
               <p className="text-steelGray mt-8">love,</p>
               <p className="text-2xl font-serif italic text-deepNavy">allen joseph</p>
             </div>
@@ -183,10 +185,10 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               <div className="w-12 h-12 rounded-none bg-accentYellow mx-auto mb-8 flex items-center justify-center text-2xl">👋</div>
               <h2 className="text-3xl font-extrabold text-deepNavy mb-4">what should we call you?</h2>
               <p className="text-steelGray mb-10">let's make this personal</p>
-              
-              <input 
+
+              <input
                 autoFocus
-                type="text" 
+                type="text"
                 className="w-full text-center text-2xl border-b-2 border-softBorder focus:border-deepNavy outline-none py-4 bg-transparent text-deepNavy placeholder:text-steelGray/30 transition-colors font-bold"
                 placeholder="your name"
                 value={data.name}
@@ -201,20 +203,19 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             <div className="text-center animate-slide-up">
               <h2 className="text-3xl font-extrabold text-deepNavy mb-4">how do you identify?</h2>
               <p className="text-steelGray mb-10">helps us personalize your experience</p>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 {genderOptions.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => setData({ ...data, gender: option.id })}
-                    className={`p-6 rounded-none border-2 transition-all duration-200 flex flex-col items-center gap-3 hover:scale-[1.02] ${
-                      data.gender === option.id 
-                        ? 'border-primaryGold bg-primaryGold/5' 
+                    className={`p - 6 rounded - none border - 2 transition - all duration - 200 flex flex - col items - center gap - 3 hover: scale - [1.02] ${data.gender === option.id
+                        ? 'border-primaryGold bg-primaryGold/5'
                         : 'border-softBorder hover:border-primaryGold/50'
-                    }`}
+                      } `}
                   >
                     <span className="text-3xl">{option.icon}</span>
-                    <span className={`font-bold ${data.gender === option.id ? 'text-primaryGold' : 'text-deepNavy'}`}>
+                    <span className={`font - bold ${data.gender === option.id ? 'text-primaryGold' : 'text-deepNavy'} `}>
                       {option.label}
                     </span>
                   </button>
@@ -228,19 +229,18 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             <div className="text-center animate-slide-up">
               <h2 className="text-3xl font-extrabold text-deepNavy mb-4">how many years young are you?</h2>
               <p className="text-steelGray mb-10">we tailor content to your stage of life</p>
-              
+
               <div className="flex flex-col gap-3">
                 {ageOptions.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => setData({ ...data, ageRange: option.id })}
-                    className={`p-5 rounded-none border-2 transition-all duration-200 flex items-center justify-between hover:scale-[1.01] ${
-                      data.ageRange === option.id 
-                        ? 'border-primaryGold bg-primaryGold/5' 
+                    className={`p - 5 rounded - none border - 2 transition - all duration - 200 flex items - center justify - between hover: scale - [1.01] ${data.ageRange === option.id
+                        ? 'border-primaryGold bg-primaryGold/5'
                         : 'border-softBorder hover:border-primaryGold/50'
-                    }`}
+                      } `}
                   >
-                    <span className={`font-bold text-lg ${data.ageRange === option.id ? 'text-primaryGold' : 'text-deepNavy'}`}>
+                    <span className={`font - bold text - lg ${data.ageRange === option.id ? 'text-primaryGold' : 'text-deepNavy'} `}>
                       {option.label}
                     </span>
                     {data.ageRange === option.id && (
@@ -259,22 +259,21 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             <div className="text-center animate-slide-up">
               <h2 className="text-3xl font-extrabold text-deepNavy mb-4">how did you hear about studymi?</h2>
               <p className="text-steelGray mb-10">helps us reach more learners like you</p>
-              
+
               <div className="grid grid-cols-2 gap-3">
                 {referralOptions.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => setData({ ...data, referralSource: option.id })}
-                    className={`p-5 rounded-none border-2 transition-all duration-200 flex items-center gap-4 hover:scale-[1.02] ${
-                      data.referralSource === option.id 
-                        ? 'border-primaryGold bg-primaryGold/5' 
+                    className={`p - 5 rounded - none border - 2 transition - all duration - 200 flex items - center gap - 4 hover: scale - [1.02] ${data.referralSource === option.id
+                        ? 'border-primaryGold bg-primaryGold/5'
                         : 'border-softBorder hover:border-primaryGold/50'
-                    }`}
+                      } `}
                   >
-                    <div className={`w-10 h-10 rounded-none ${option.color} flex items-center justify-center text-white`}>
+                    <div className={`w - 10 h - 10 rounded - none ${option.color} flex items - center justify - center text - white`}>
                       <option.icon className="w-5 h-5" />
                     </div>
-                    <span className={`font-bold text-sm ${data.referralSource === option.id ? 'text-primaryGold' : 'text-deepNavy'}`}>
+                    <span className={`font - bold text - sm ${data.referralSource === option.id ? 'text-primaryGold' : 'text-deepNavy'} `}>
                       {option.label}
                     </span>
                   </button>
@@ -288,7 +287,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             <div className="text-center animate-slide-up">
               <h2 className="text-3xl font-extrabold text-deepNavy mb-4">what do you study?</h2>
               <p className="text-steelGray mb-10">select all that apply</p>
-              
+
               <div className="grid grid-cols-2 gap-3">
                 {studyOptions.map((option) => {
                   const isSelected = data.studyAreas.includes(option.id);
@@ -296,16 +295,15 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                     <button
                       key={option.id}
                       onClick={() => toggleArrayItem('studyAreas', option.id)}
-                      className={`p-5 rounded-none border-2 transition-all duration-200 flex items-center gap-4 hover:scale-[1.02] ${
-                        isSelected 
-                          ? 'border-primaryGold bg-primaryGold/5' 
+                      className={`p - 5 rounded - none border - 2 transition - all duration - 200 flex items - center gap - 4 hover: scale - [1.02] ${isSelected
+                          ? 'border-primaryGold bg-primaryGold/5'
                           : 'border-softBorder hover:border-primaryGold/50'
-                      }`}
+                        } `}
                     >
-                      <div className={`w-10 h-10 rounded-none ${isSelected ? 'bg-primaryGold text-white' : 'bg-iceGray text-deepNavy'} flex items-center justify-center transition-colors`}>
+                      <div className={`w - 10 h - 10 rounded - none ${isSelected ? 'bg-primaryGold text-white' : 'bg-iceGray text-deepNavy'} flex items - center justify - center transition - colors`}>
                         <option.icon className="w-5 h-5" />
                       </div>
-                      <span className={`font-bold text-sm text-left ${isSelected ? 'text-primaryGold' : 'text-deepNavy'}`}>
+                      <span className={`font - bold text - sm text - left ${isSelected ? 'text-primaryGold' : 'text-deepNavy'} `}>
                         {option.label}
                       </span>
                     </button>
@@ -320,22 +318,21 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             <div className="text-center animate-slide-up">
               <h2 className="text-3xl font-extrabold text-deepNavy mb-4">what's your current goal?</h2>
               <p className="text-steelGray mb-10">we'll optimize your experience around this</p>
-              
+
               <div className="flex flex-col gap-3">
                 {goalOptions.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => setData({ ...data, goal: option.id })}
-                    className={`p-5 rounded-none border-2 transition-all duration-200 flex items-center gap-4 hover:scale-[1.01] ${
-                      data.goal === option.id 
-                        ? 'border-primaryGold bg-primaryGold/5' 
+                    className={`p - 5 rounded - none border - 2 transition - all duration - 200 flex items - center gap - 4 hover: scale - [1.01] ${data.goal === option.id
+                        ? 'border-primaryGold bg-primaryGold/5'
                         : 'border-softBorder hover:border-primaryGold/50'
-                    }`}
+                      } `}
                   >
-                    <div className={`w-10 h-10 rounded-none ${data.goal === option.id ? 'bg-primaryGold text-white' : 'bg-iceGray text-deepNavy'} flex items-center justify-center transition-colors`}>
+                    <div className={`w - 10 h - 10 rounded - none ${data.goal === option.id ? 'bg-primaryGold text-white' : 'bg-iceGray text-deepNavy'} flex items - center justify - center transition - colors`}>
                       <option.icon className="w-5 h-5" />
                     </div>
-                    <span className={`font-bold ${data.goal === option.id ? 'text-primaryGold' : 'text-deepNavy'}`}>
+                    <span className={`font - bold ${data.goal === option.id ? 'text-primaryGold' : 'text-deepNavy'} `}>
                       {option.label}
                     </span>
                   </button>
@@ -349,7 +346,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             <div className="text-center animate-slide-up">
               <h2 className="text-3xl font-extrabold text-deepNavy mb-4">where do you get your learning material?</h2>
               <p className="text-steelGray mb-10">select all that apply</p>
-              
+
               <div className="grid grid-cols-2 gap-3">
                 {sourceOptions.map((option) => {
                   const isSelected = data.learningSources.includes(option.id);
@@ -357,16 +354,15 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                     <button
                       key={option.id}
                       onClick={() => toggleArrayItem('learningSources', option.id)}
-                      className={`p-5 rounded-none border-2 transition-all duration-200 flex items-center gap-4 hover:scale-[1.02] ${
-                        isSelected 
-                          ? 'border-primaryGold bg-primaryGold/5' 
+                      className={`p - 5 rounded - none border - 2 transition - all duration - 200 flex items - center gap - 4 hover: scale - [1.02] ${isSelected
+                          ? 'border-primaryGold bg-primaryGold/5'
                           : 'border-softBorder hover:border-primaryGold/50'
-                      }`}
+                        } `}
                     >
-                      <div className={`w-10 h-10 rounded-none ${isSelected ? 'bg-primaryGold text-white' : 'bg-iceGray text-deepNavy'} flex items-center justify-center transition-colors`}>
+                      <div className={`w - 10 h - 10 rounded - none ${isSelected ? 'bg-primaryGold text-white' : 'bg-iceGray text-deepNavy'} flex items - center justify - center transition - colors`}>
                         <option.icon className="w-5 h-5" />
                       </div>
-                      <span className={`font-bold text-sm text-left ${isSelected ? 'text-primaryGold' : 'text-deepNavy'}`}>
+                      <span className={`font - bold text - sm text - left ${isSelected ? 'text-primaryGold' : 'text-deepNavy'} `}>
                         {option.label}
                       </span>
                     </button>
@@ -386,9 +382,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   <BookOpen className="w-10 h-10 text-white" />
                 </div>
               </div>
-              
+
               <h2 className="text-3xl font-extrabold text-deepNavy mb-8">how is studymi different from ChatGPT?</h2>
-              
+
               <div className="text-left space-y-4 bg-iceGray/50 p-8 rounded-none">
                 <div className="flex items-start gap-4">
                   <div className="w-2 h-2 rounded-none bg-primaryGold mt-2 flex-shrink-0"></div>
@@ -414,9 +410,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               </div>
               <h2 className="text-3xl font-extrabold text-deepNavy mb-4">what do you want to learn first?</h2>
               <p className="text-steelGray mb-10">optional — you can skip this</p>
-              
-              <input 
-                type="text" 
+
+              <input
+                type="text"
                 className="w-full text-center text-xl border-b-2 border-softBorder focus:border-deepNavy outline-none py-4 bg-transparent text-deepNavy placeholder:text-steelGray/40 transition-colors"
                 placeholder="e.g. Organic chemistry, Python, Macroeconomics..."
                 value={data.firstTopic}
@@ -434,18 +430,18 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 <div className="absolute inset-0 flex items-end justify-center gap-2 px-8">
                   {[20, 35, 50, 70, 95].map((height, i) => (
                     <div key={i} className="flex-1 bg-iceGray rounded-none relative overflow-hidden">
-                      <div 
+                      <div
                         className="absolute bottom-0 left-0 right-0 bg-primaryGold rounded-none transition-all duration-1000"
-                        style={{ height: `${height}%`, transitionDelay: `${i * 100}ms` }}
+                        style={{ height: `${height}% `, transitionDelay: `${i * 100} ms` }}
                       ></div>
                     </div>
                   ))}
                 </div>
                 <TrendingUp className="absolute bottom-4 right-4 w-8 h-8 text-primaryGold" />
               </div>
-              
+
               <h2 className="text-2xl font-extrabold text-deepNavy mb-4">you're in good hands</h2>
-              
+
               <div className="bg-iceGray/50 p-6 rounded-none mb-8">
                 <p className="text-4xl font-extrabold text-primaryGold mb-2">3.4×</p>
                 <p className="text-deepNavy font-medium">
@@ -463,11 +459,11 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   <p className="font-bold text-deepNavy">Gen Z Mode</p>
                   <p className="text-sm text-steelGray">Chill vibes, simple explanations ✨</p>
                 </div>
-                <button 
+                <button
                   onClick={() => setData({ ...data, genZMode: !data.genZMode })}
-                  className={`w-14 h-8 rounded-none transition-colors relative ${data.genZMode ? 'bg-primaryGold' : 'bg-softBorder'}`}
+                  className={`w - 14 h - 8 rounded - none transition - colors relative ${data.genZMode ? 'bg-primaryGold' : 'bg-softBorder'} `}
                 >
-                  <div className={`absolute top-1 w-6 h-6 bg-white rounded-none shadow-md transition-transform duration-300 ${data.genZMode ? 'left-7' : 'left-1'}`} />
+                  <div className={`absolute top - 1 w - 6 h - 6 bg - white rounded - none shadow - md transition - transform duration - 300 ${data.genZMode ? 'left-7' : 'left-1'} `} />
                 </button>
               </div>
             </div>
@@ -478,7 +474,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
       {/* Footer with CTA */}
       <div className="w-full max-w-lg mx-auto px-6 pb-10">
-        <button 
+        <button
           onClick={handleNext}
           disabled={!canProceed()}
           className="w-full bg-deepNavy text-white py-5 rounded-none font-bold text-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-xl shadow-deepNavy/20"
