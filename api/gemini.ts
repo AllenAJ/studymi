@@ -78,9 +78,9 @@ const TEACH_BACK_SCHEMA = {
     required: ["score", "feedback", "missingConcepts", "correction"]
 };
 
-import { getUser } from './_utils/auth';
-import { rateLimit } from './_utils/rate-limit';
-import { logUsage, checkUsageLimit, getProfile } from './_utils/db';
+import { getUser } from './_utils/auth.js';
+import { rateLimit } from './_utils/rate-limit.js';
+import { logUsage, checkUsageLimit, getProfile, getMonthlyGenerationCount } from './_utils/db.js';
 
 const ALLOWED_ACTIONS = ['generateStudySet', 'gradeTeachBack'];
 const MAX_PROMPT_LENGTH = 20000;
@@ -121,16 +121,6 @@ export default async function handler(req: any, res: any) {
             return res.status(429).json({ error: 'Too many requests. Please try again later.' });
         }
 
-        // Monthly Quota Check
-        if (user.id) {
-            const profile = await getProfile(user.id);
-            const limit = profile?.is_premium ? 50000000 : 2000000;
-
-            if (!(await checkUsageLimit(user.id, limit))) {
-                return res.status(403).json({ error: 'Monthly usage limit exceeded. Please upgrade or wait until next month.' });
-            }
-        }
-
         const { action, prompt, isGenZ, inlineData } = req.body;
 
         // Input Validation
@@ -140,6 +130,26 @@ export default async function handler(req: any, res: any) {
 
         if (!prompt || typeof prompt !== 'string' || prompt.length > MAX_PROMPT_LENGTH) {
             return res.status(400).json({ error: 'Invalid prompt: Too long or missing' });
+        }
+
+        // Monthly Quota Check
+        if (user.id) {
+            const profile = await getProfile(user.id);
+            const isPremium = profile?.is_premium;
+            const tokenLimit = isPremium ? 50000000 : 2000000;
+
+            // 1. Check Token Limit (Cost)
+            if (!(await checkUsageLimit(user.id, tokenLimit))) {
+                return res.status(403).json({ error: 'Monthly usage limit exceeded. Please upgrade or wait until next month.' });
+            }
+
+            // 2. Check Generation Count Limit (Strict "3 per month" for Free)
+            if (action === 'generateStudySet' && !isPremium) {
+                const genCount = await getMonthlyGenerationCount(user.id);
+                if (genCount >= 3) {
+                    return res.status(403).json({ error: 'Free plan limit reached (3 sets/month). Upgrade for unlimited.' });
+                }
+            }
         }
 
         const apiKey = process.env.GEMINI_API_KEY;
@@ -202,9 +212,9 @@ export default async function handler(req: any, res: any) {
         const inputEst = prompt.length / 4;
         const outputEst = cleanText.length / 4;
 
-        // Fire and forget logging
+        // Ensure usage is logged before returning (prevents race condition)
         try {
-            logUsage(user.id, `gemini_${action}`, Math.ceil(inputEst), Math.ceil(outputEst));
+            await logUsage(user.id, `gemini_${action}`, Math.ceil(inputEst), Math.ceil(outputEst));
         } catch (logError) {
             console.warn('Logging failed but processing continued:', logError);
         }
