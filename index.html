@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Studymi - AI Note Taking & Study App | Master the Feynman Technique</title>
   <meta name="description"
     content="Master any topic with Studymi, the best AI note taking app. Convert lectures to notes, generate flashcards, and use the Feynman Technique to learn faster. The best alternative to Notewave." />
@@ -11,6 +11,13 @@
     content="ai note taking, feynman technique app, lecture transcription, ai study companion, flashcard generator, mind map maker, notewave alternative, study app" />
   <link rel="canonical" href="https://studymi.xyz" />
   <meta name="theme-color" content="#FFE44D" />
+
+  <!-- Mobile & PWA meta tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Studymi">
+  <meta name="mobile-web-app-capable" content="yes">
+
   <meta http-equiv="Content-Security-Policy"
     content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://va.vercel-scripts.com https://*.posthog.com https://*.i.posthog.com https://tally.so; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*.googleusercontent.com https://img.youtube.com; connect-src 'self' https://*.supabase.co https://generativelanguage.googleapis.com https://vitals.vercel-insights.com https://*.posthog.com https://*.i.posthog.com; media-src 'self' blob: data:; frame-src 'self' https://tally.so;">
 
@@ -102,27 +109,22 @@
     }
   </script>
   <style>
-    /* Custom Scrollbar */
+    /* Aggressively hide scrollbars across all elements and browsers */
+    html,
+    body,
+    *,
     ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+      scrollbar-width: none !important;
+      /* Firefox */
+      -ms-overflow-style: none !important;
+      /* IE and Edge */
     }
 
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #DDE3EA;
-      border-radius: 3px;
-    }
-
-    .dark ::-webkit-scrollbar-thumb {
-      background: #262626;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: #F59E0B;
+    ::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+      background: transparent !important;
     }
 
     .perspective-1000 {
@@ -189,6 +191,36 @@
       animation: sparkle 1.5s ease-in-out infinite;
       pointer-events: none;
     }
+
+    /* Safe Area Support */
+    :root {
+      --safe-area-top: env(safe-area-inset-top, 0px);
+      --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-area-left: env(safe-area-inset-left, 0px);
+      --safe-area-right: env(safe-area-inset-right, 0px);
+    }
+
+    body {
+      padding-top: var(--safe-area-top);
+      padding-bottom: var(--safe-area-bottom);
+      padding-left: var(--safe-area-left);
+      padding-right: var(--safe-area-right);
+    }
+
+    /* Ensure fixed headers and tabs also respect safe areas if needed */
+    .safe-top {
+      padding-top: var(--safe-area-top);
+    }
+
+    .safe-bottom {
+      padding-bottom: var(--safe-area-bottom);
+    }
+
+    .safe-pb {
+      padding-bottom: calc(1.5rem + var(--safe-area-bottom));
+    }
+
+    /* For bottom floating buttons */
   </style>
   <script type="module" src="/index.tsx"></script>
   <script type="application/ld+json">

@@ -12,11 +12,33 @@ import { PricingPage } from './components/PricingPage';
 import { WaitlistPage } from './components/WaitlistPage';
 import { User } from '@supabase/supabase-js';
 import { usePostHog } from 'posthog-js/react';
+import { useRegisterSW } from 'virtual:pwa-register/react';
 
 type ViewType = 'loading' | 'landing' | 'auth' | 'onboarding' | 'dashboard' | 'study' | 'privacy' | 'terms' | 'disclaimer' | 'refund' | 'pricing';
 
 const App: React.FC = () => {
   const posthog = usePostHog();
+
+  const {
+    needRefresh: [needRefresh],
+    updateServiceWorker,
+  } = useRegisterSW({
+    onRegistered(r) {
+      if (r) {
+        // Check for updates every minute
+        setInterval(() => {
+          console.log('[PWA] Checking for updates...');
+          r.update();
+        }, 60000);
+      }
+    },
+    onNeedRefresh() {
+      console.log('[PWA] Update available, prompt showing.');
+    },
+    onOfflineReady() {
+      console.log('[PWA] App ready for offline use.');
+    }
+  });
 
   // Check URL for legal pages on initial load
   const getInitialView = (): ViewType => {
@@ -332,10 +354,11 @@ const App: React.FC = () => {
     setView('landing');
   };
 
+
   // Loading state
   if (view === 'loading') {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-iceGray dark:bg-darkBg flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-none bg-accentYellow animate-pulse"></div>
           <p className="text-steelGray font-medium">Loading...</p>
@@ -344,16 +367,10 @@ const App: React.FC = () => {
     );
   }
 
-  if (view === 'onboarding') {
-    return <Onboarding onComplete={handleOnboardingComplete} />;
-  }
-
-  if (view === 'auth') {
-    return <AuthPage onComplete={handleAuthComplete} onBack={() => setView('landing')} />;
-  }
-
-  if (view === 'dashboard') {
-    return (
+  const MainContent = () => {
+    if (view === 'onboarding') return <Onboarding onComplete={handleOnboardingComplete} />;
+    if (view === 'auth') return <AuthPage onComplete={handleAuthComplete} onBack={() => setView('landing')} />;
+    if (view === 'dashboard') return (
       <Dashboard
         user={user}
         onProcess={handleProcess}
@@ -370,37 +387,34 @@ const App: React.FC = () => {
         subscriptionId={subscriptionId}
       />
     );
-  }
-
-  if (view === 'study' && currentSet) {
-    return <StudyView studySet={currentSet} onBack={() => setView('dashboard')} />;
-  }
-
-  if (view === 'privacy') {
-    return <LegalPage type="privacy" onBack={handleLegalBack} />;
-  }
-
-  if (view === 'terms') {
-    return <LegalPage type="terms" onBack={handleLegalBack} />;
-  }
-
-  if (view === 'disclaimer') {
-    return <LegalPage type="disclaimer" onBack={handleLegalBack} />;
-  }
-
-  if (view === 'refund') {
-    return <LegalPage type="refund" onBack={handleLegalBack} />;
-  }
-
-  if (view === 'pricing') {
-    return <PricingPage onBack={handleLegalBack} />;
-  }
-
-  if (view === 'landing') {
+    if (view === 'study' && currentSet) return <StudyView studySet={currentSet} onBack={() => setView('dashboard')} />;
+    if (view === 'privacy') return <LegalPage type="privacy" onBack={handleLegalBack} />;
+    if (view === 'terms') return <LegalPage type="terms" onBack={handleLegalBack} />;
+    if (view === 'disclaimer') return <LegalPage type="disclaimer" onBack={handleLegalBack} />;
+    if (view === 'refund') return <LegalPage type="refund" onBack={handleLegalBack} />;
+    if (view === 'pricing') return <PricingPage onBack={handleLegalBack} />;
     return <LandingPage onStart={() => setView('auth')} />;
-  }
+  };
 
-  return <LandingPage onStart={() => setView('auth')} />;
+  return (
+    <div className="min-h-screen bg-iceGray dark:bg-darkBg overflow-x-hidden">
+      {/* PWA Update Notification - Global */}
+      {needRefresh && (
+        <div className="fixed top-0 left-0 right-0 z-[10000] p-4 bg-primaryGold text-deepNavy flex items-center justify-between shadow-2xl animate-slide-down safe-top">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-sm">Update available!</span>
+          </div>
+          <button
+            onClick={() => updateServiceWorker(true)}
+            className="bg-deepNavy text-white px-4 py-1.5 font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-opacity"
+          >
+            Refresh
+          </button>
+        </div>
+      )}
+      <MainContent />
+    </div>
+  );
 };
 
 export default App;

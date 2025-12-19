@@ -4,6 +4,7 @@ import { InputType, StudySet } from '../types';
 import { supabase } from '../services/supabase';
 import { usePostHog } from 'posthog-js/react';
 import { getVibeString } from '../services/genZUtils';
+import { Smartphone } from 'lucide-react';
 
 // Free tier limit
 // Free tier limit
@@ -245,6 +246,29 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   // Upgrade Modal State
   const [isYearlyPlan, setIsYearlyPlan] = useState(true);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+    }
+  };
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -604,6 +628,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <span className="lg:hidden text-sm">Feedback</span>
           </button>
 
+          {deferredPrompt && (
+            <button
+              onClick={() => { handleInstallClick(); setIsSidebarOpen(false); }}
+              className="flex items-center gap-4 p-3.5 rounded-none bg-primaryGold/10 text-primaryGold hover:bg-primaryGold/20 transition-colors animate-pulse"
+            >
+              <Smartphone className="w-5 h-5" />
+              <span className="lg:hidden text-sm font-bold">Install App</span>
+            </button>
+          )}
+
           <div className="w-full h-px bg-softBorder dark:bg-darkBorder my-2"></div>
 
           <button
@@ -617,6 +651,40 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
     );
   };
+
+  const MobileBottomNav = () => (
+    <div className="lg:hidden fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] left-4 right-4 h-16 bg-white/90 dark:bg-darkCard/90 backdrop-blur-xl border border-softBorder dark:border-darkBorder rounded-2xl shadow-2xl flex items-center justify-around px-2 z-[60]">
+      <button
+        onClick={() => setActiveTab('home')}
+        className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all ${activeTab === 'home' ? 'text-primaryGold' : 'text-steelGray dark:text-darkMuted'}`}
+      >
+        <Home className="w-6 h-6 stroke-2" />
+        <span className="text-[10px] font-bold mt-1 uppercase tracking-tight">home</span>
+      </button>
+      <button
+        onClick={() => setActiveTab('insights')}
+        className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all ${activeTab === 'insights' ? 'text-primaryGold' : 'text-steelGray dark:text-darkMuted'}`}
+      >
+        <BarChart2 className="w-6 h-6 stroke-2" />
+        <span className="text-[10px] font-bold mt-1 uppercase tracking-tight">data</span>
+      </button>
+      <button
+        onClick={() => setActiveTab('history')}
+        className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all ${activeTab === 'history' ? 'text-primaryGold' : 'text-steelGray dark:text-darkMuted'}`}
+      >
+        <Clock className="w-6 h-6 stroke-2" />
+        <span className="text-[10px] font-bold mt-1 uppercase tracking-tight">vibes</span>
+      </button>
+      <div className="w-px h-8 bg-softBorder dark:bg-darkBorder/50"></div>
+      <button
+        onClick={() => setIsSidebarOpen(true)}
+        className="flex flex-col items-center justify-center py-1 px-3 rounded-xl text-steelGray dark:text-darkMuted"
+      >
+        <Menu className="w-6 h-6 stroke-2" />
+        <span className="text-[10px] font-bold mt-1 uppercase tracking-tight">more</span>
+      </button>
+    </div>
+  );
 
   return (
     <div className={`min-h-screen bg-iceGray dark:bg-darkBg font-sans flex text-deepNavy dark:text-darkText relative overflow-hidden transition-colors duration-300 ${isGenZMode ? 'genz-mode' : ''}`}>
@@ -647,17 +715,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
       )}
 
       {/* Main Content */}
-      <main className="flex-1 lg:ml-24 p-6 md:p-12 overflow-y-auto min-h-screen relative">
+      <main className="flex-1 lg:ml-24 p-6 md:p-12 overflow-y-auto min-h-screen relative pb-32 lg:pb-12">
+        <MobileBottomNav />
 
-        {/* Top Controls Bar */}
-        <div className="flex justify-between items-center mb-10">
-          <div className="flex items-center gap-4 lg:hidden">
-            <button onClick={() => setIsSidebarOpen(true)} className="p-2 -ml-2 text-deepNavy dark:text-white hover:bg-white/50 dark:hover:bg-darkCard rounded-none transition-colors">
-              <Menu className="w-6 h-6" />
-            </button>
+        {/* Top Controls Bar - No longer fixed on mobile */}
+        <div className="flex justify-between items-center mb-10 px-0 lg:px-0 safe-top">
+          <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <img src="/favicon-96x96.png" alt="Studymi" className="w-6 h-6" />
-              <span className="font-bold text-lg dark:text-white tracking-tight">studymi</span>
+              <img src="/favicon-96x96.png" alt="Studymi" className="w-8 h-8 md:w-6 md:h-6" />
+              <span className="font-bold text-xl md:text-lg dark:text-white tracking-tight">studymi</span>
             </div>
           </div>
 
@@ -703,7 +769,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               onClick={() => setIsDarkMode(!isDarkMode)}
               className="w-10 h-10 rounded-none bg-white dark:bg-darkCard border border-softBorder dark:border-darkBorder flex items-center justify-center shadow-sm hover:scale-105 transition-transform text-steelGray dark:text-white"
             >
-              {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+              {isDarkMode ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </button>
 
             <div className="flex items-center gap-2 bg-white/60 dark:bg-darkCard backdrop-blur-sm px-3 py-2 rounded-none border border-softBorder dark:border-darkBorder shadow-sm">
@@ -738,8 +804,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   onClick={() => setActiveModal(item.id as any)}
                   className="bg-white dark:bg-darkCard rounded-none p-6 border border-softBorder dark:border-darkBorder hover:border-primaryGold dark:hover:border-primaryGold hover:shadow-hover transition-all group flex flex-col items-start gap-4"
                 >
-                  <div className="w-10 h-10 bg-iceGray dark:bg-darkBorder rounded-none flex items-center justify-center text-deepNavy dark:text-white group-hover:bg-primaryGold group-hover:text-white transition-colors">
-                    <item.icon className="w-5 h-5 stroke-[1.5]" />
+                  <div className="w-10 h-10 shrink-0 bg-iceGray dark:bg-darkBorder rounded-none flex items-center justify-center text-deepNavy dark:text-white group-hover:bg-primaryGold group-hover:text-white transition-colors">
+                    <item.icon className="w-6 h-6 stroke-2" />
                   </div>
                   <div className="text-left">
                     <h3 className="font-bold text-deepNavy dark:text-white">{item.label}</h3>
@@ -758,17 +824,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   {history.slice(0, 5).map((set) => (
                     <div
                       key={set.id}
-                      className="w-full bg-white dark:bg-darkCard p-5 rounded-none border border-softBorder dark:border-darkBorder hover:border-primaryGold dark:hover:border-white/20 transition-all flex items-center justify-between group shadow-sm hover:shadow-md"
+                      className="w-full bg-white dark:bg-darkCard p-6 rounded-none border border-softBorder dark:border-darkBorder hover:border-primaryGold dark:hover:border-white/20 transition-all flex items-center justify-between group shadow-sm hover:shadow-md"
                     >
                       <button
                         onClick={() => onSelectHistory(set)}
                         className="flex items-center gap-4 flex-1"
                       >
-                        <div className="w-10 h-10 rounded-none bg-iceGray dark:bg-darkBorder flex items-center justify-center text-deepNavy dark:text-white group-hover:bg-primaryGold group-hover:text-white transition-colors">
-                          {set.type === 'audio' ? <Mic className="w-4 h-4" /> :
-                            set.type === 'youtube' ? <Youtube className="w-4 h-4" /> :
-                              set.type === 'pdf' ? <Upload className="w-4 h-4" /> :
-                                <FileText className="w-4 h-4" />}
+                        <div className="w-10 h-10 shrink-0 rounded-none bg-iceGray dark:bg-darkBorder flex items-center justify-center text-deepNavy dark:text-white group-hover:bg-primaryGold group-hover:text-white transition-colors">
+                          {set.type === 'audio' ? <Mic className="w-6 h-6 stroke-2" /> :
+                            set.type === 'youtube' ? <Youtube className="w-6 h-6 stroke-2" /> :
+                              set.type === 'pdf' ? <Upload className="w-6 h-6 stroke-2" /> :
+                                <FileText className="w-6 h-6 stroke-2" />}
                         </div>
                         <div className="text-left">
                           <h3 className="font-bold text-base dark:text-white group-hover:text-primaryGold dark:group-hover:text-primaryGold transition-colors">{set.title}</h3>
@@ -781,10 +847,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                             onClick={(e) => { e.stopPropagation(); setStudySetToDelete(set.id); setActiveModal('confirmDelete'); }}
                             className="p-2 rounded-none hover:bg-red-50 dark:hover:bg-red-900/10 text-steelGray hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-6 h-6" />
                           </button>
                         )}
-                        <ArrowRight className="w-4 h-4 text-steelGray group-hover:text-primaryGold transition-colors" />
+                        <ArrowRight className="w-6 h-6 text-steelGray group-hover:text-primaryGold transition-colors" />
                       </div>
                     </div>
                   ))}
@@ -956,7 +1022,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     className="w-full text-left px-6 py-4 rounded-none border border-softBorder dark:border-darkBorder font-medium text-deepNavy dark:text-white text-sm hover:bg-iceGray dark:hover:bg-darkBorder/50 transition-colors flex justify-between items-center disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Clear all study history ({history.length} sets)
-                    <Info className="w-4 h-4 text-steelGray" />
+                    <Info className="w-5 h-5 text-steelGray" />
                   </button>
 
                   <button
@@ -964,7 +1030,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     className="w-full text-left px-6 py-4 rounded-none bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 font-bold text-sm hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors flex justify-between items-center"
                   >
                     Delete account
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
               </div>
@@ -986,11 +1052,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     onClick={() => onSelectHistory(set)}
                     className="flex items-center gap-4 flex-1 text-left"
                   >
-                    <div className="w-10 h-10 rounded-none bg-iceGray dark:bg-darkBorder flex items-center justify-center text-deepNavy dark:text-white">
-                      {set.type === 'audio' ? <Mic className="w-5 h-5" /> :
-                        set.type === 'youtube' ? <Youtube className="w-5 h-5" /> :
-                          set.type === 'pdf' ? <Upload className="w-5 h-5" /> :
-                            <FileText className="w-5 h-5" />}
+                    <div className="w-10 h-10 shrink-0 rounded-none bg-iceGray dark:bg-darkBorder flex items-center justify-center text-deepNavy dark:text-white">
+                      {set.type === 'audio' ? <Mic className="w-6 h-6 stroke-2" /> :
+                        set.type === 'youtube' ? <Youtube className="w-6 h-6 stroke-2" /> :
+                          set.type === 'pdf' ? <Upload className="w-6 h-6 stroke-2" /> :
+                            <FileText className="w-6 h-6 stroke-2" />}
                     </div>
                     <div>
                       <h3 className="font-bold text-lg dark:text-white">{set.title}</h3>
@@ -1002,11 +1068,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   {onDeleteStudySet && (
                     <button
                       onClick={(e) => { e.stopPropagation(); setStudySetToDelete(set.id); setActiveModal('confirmDelete'); }}
-                      className="p-2 rounded-none hover:bg-red-50 dark:hover:bg-red-900/10 text-steelGray hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                      className="p-2 rounded-none hover:bg-red-50 dark:hover:bg-red-900/10 text-steelGray hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 mr-2"
                     >
-                      <Trash2 className="w-5 h-5" />
+                      <Trash2 className="w-6 h-6" />
                     </button>
                   )}
+                  <ArrowRight className="w-6 h-6 text-steelGray group-hover:text-primaryGold transition-colors" />
                 </div>
               ))}
               {history.length === 0 && (
