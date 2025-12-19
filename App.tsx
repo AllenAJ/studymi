@@ -396,7 +396,11 @@ const App: React.FC = () => {
     return <PricingPage onBack={handleLegalBack} />;
   }
 
-  return <WaitlistPage />;
+  if (view === 'landing') {
+    return <LandingPage onStart={() => setView('auth')} />;
+  }
+
+  return <LandingPage onStart={() => setView('auth')} />;
 };
 
 export default App;
