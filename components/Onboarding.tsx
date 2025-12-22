@@ -209,13 +209,13 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   <button
                     key={option.id}
                     onClick={() => setData({ ...data, gender: option.id })}
-                    className={`p - 6 rounded - none border - 2 transition - all duration - 200 flex flex - col items - center gap - 3 hover: scale - [1.02] ${data.gender === option.id
-                        ? 'border-primaryGold bg-primaryGold/5'
-                        : 'border-softBorder hover:border-primaryGold/50'
+                    className={`p-6 rounded-none border-2 transition-all duration-200 flex flex-col items-center gap-3 hover:scale-[1.02] ${data.gender === option.id
+                      ? 'border-primaryGold bg-primaryGold/5'
+                      : 'border-softBorder hover:border-primaryGold/50'
                       } `}
                   >
                     <span className="text-3xl">{option.icon}</span>
-                    <span className={`font - bold ${data.gender === option.id ? 'text-primaryGold' : 'text-deepNavy'} `}>
+                    <span className={`font-bold ${data.gender === option.id ? 'text-primaryGold' : 'text-deepNavy'} `}>
                       {option.label}
                     </span>
                   </button>
@@ -235,12 +235,12 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   <button
                     key={option.id}
                     onClick={() => setData({ ...data, ageRange: option.id })}
-                    className={`p - 5 rounded - none border - 2 transition - all duration - 200 flex items - center justify - between hover: scale - [1.01] ${data.ageRange === option.id
-                        ? 'border-primaryGold bg-primaryGold/5'
-                        : 'border-softBorder hover:border-primaryGold/50'
+                    className={`p-5 rounded-none border-2 transition-all duration-200 flex items-center justify-between hover:scale-[1.01] ${data.ageRange === option.id
+                      ? 'border-primaryGold bg-primaryGold/5'
+                      : 'border-softBorder hover:border-primaryGold/50'
                       } `}
                   >
-                    <span className={`font - bold text - lg ${data.ageRange === option.id ? 'text-primaryGold' : 'text-deepNavy'} `}>
+                    <span className={`font-bold text-lg ${data.ageRange === option.id ? 'text-primaryGold' : 'text-deepNavy'} `}>
                       {option.label}
                     </span>
                     {data.ageRange === option.id && (
@@ -265,15 +265,15 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   <button
                     key={option.id}
                     onClick={() => setData({ ...data, referralSource: option.id })}
-                    className={`p - 5 rounded - none border - 2 transition - all duration - 200 flex items - center gap - 4 hover: scale - [1.02] ${data.referralSource === option.id
-                        ? 'border-primaryGold bg-primaryGold/5'
-                        : 'border-softBorder hover:border-primaryGold/50'
+                    className={`p-5 rounded-none border-2 transition-all duration-200 flex items-center gap-4 hover:scale-[1.02] ${data.referralSource === option.id
+                      ? 'border-primaryGold bg-primaryGold/5'
+                      : 'border-softBorder hover:border-primaryGold/50'
                       } `}
                   >
-                    <div className={`w - 10 h - 10 rounded - none ${option.color} flex items - center justify - center text - white`}>
+                    <div className={`w-10 h-10 rounded-none ${option.color} flex items-center justify-center text-white`}>
                       <option.icon className="w-5 h-5" />
                     </div>
-                    <span className={`font - bold text - sm ${data.referralSource === option.id ? 'text-primaryGold' : 'text-deepNavy'} `}>
+                    <span className={`font-bold text-sm ${data.referralSource === option.id ? 'text-primaryGold' : 'text-deepNavy'} `}>
                       {option.label}
                     </span>
                   </button>
@@ -295,15 +295,15 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                     <button
                       key={option.id}
                       onClick={() => toggleArrayItem('studyAreas', option.id)}
-                      className={`p - 5 rounded - none border - 2 transition - all duration - 200 flex items - center gap - 4 hover: scale - [1.02] ${isSelected
-                          ? 'border-primaryGold bg-primaryGold/5'
-                          : 'border-softBorder hover:border-primaryGold/50'
+                      className={`p-5 rounded-none border-2 transition-all duration-200 flex items-center gap-4 hover:scale-[1.02] ${isSelected
+                        ? 'border-primaryGold bg-primaryGold/5'
+                        : 'border-softBorder hover:border-primaryGold/50'
                         } `}
                     >
-                      <div className={`w - 10 h - 10 rounded - none ${isSelected ? 'bg-primaryGold text-white' : 'bg-iceGray text-deepNavy'} flex items - center justify - center transition - colors`}>
+                      <div className={`w-10 h-10 rounded-none ${isSelected ? 'bg-primaryGold text-white' : 'bg-iceGray text-deepNavy'} flex items-center justify-center transition-colors`}>
                         <option.icon className="w-5 h-5" />
                       </div>
-                      <span className={`font - bold text - sm text - left ${isSelected ? 'text-primaryGold' : 'text-deepNavy'} `}>
+                      <span className={`font-bold text-sm text-left ${isSelected ? 'text-primaryGold' : 'text-deepNavy'} `}>
                         {option.label}
                       </span>
                     </button>
@@ -325,8 +325,8 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                     key={option.id}
                     onClick={() => setData({ ...data, goal: option.id })}
                     className={`p - 5 rounded - none border - 2 transition - all duration - 200 flex items - center gap - 4 hover: scale - [1.01] ${data.goal === option.id
-                        ? 'border-primaryGold bg-primaryGold/5'
-                        : 'border-softBorder hover:border-primaryGold/50'
+                      ? 'border-primaryGold bg-primaryGold/5'
+                      : 'border-softBorder hover:border-primaryGold/50'
                       } `}
                   >
                     <div className={`w - 10 h - 10 rounded - none ${data.goal === option.id ? 'bg-primaryGold text-white' : 'bg-iceGray text-deepNavy'} flex items - center justify - center transition - colors`}>
@@ -354,15 +354,15 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                     <button
                       key={option.id}
                       onClick={() => toggleArrayItem('learningSources', option.id)}
-                      className={`p - 5 rounded - none border - 2 transition - all duration - 200 flex items - center gap - 4 hover: scale - [1.02] ${isSelected
-                          ? 'border-primaryGold bg-primaryGold/5'
-                          : 'border-softBorder hover:border-primaryGold/50'
+                      className={`p-5 rounded-none border-2 transition-all duration-200 flex items-center gap-4 hover:scale-[1.02] ${isSelected
+                        ? 'border-primaryGold bg-primaryGold/5'
+                        : 'border-softBorder hover:border-primaryGold/50'
                         } `}
                     >
-                      <div className={`w - 10 h - 10 rounded - none ${isSelected ? 'bg-primaryGold text-white' : 'bg-iceGray text-deepNavy'} flex items - center justify - center transition - colors`}>
+                      <div className={`w-10 h-10 rounded-none ${isSelected ? 'bg-primaryGold text-white' : 'bg-iceGray text-deepNavy'} flex items-center justify-center transition-colors`}>
                         <option.icon className="w-5 h-5" />
                       </div>
-                      <span className={`font - bold text - sm text - left ${isSelected ? 'text-primaryGold' : 'text-deepNavy'} `}>
+                      <span className={`font-bold text-sm text-left ${isSelected ? 'text-primaryGold' : 'text-deepNavy'} `}>
                         {option.label}
                       </span>
                     </button>
@@ -461,9 +461,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 </div>
                 <button
                   onClick={() => setData({ ...data, genZMode: !data.genZMode })}
-                  className={`w - 14 h - 8 rounded - none transition - colors relative ${data.genZMode ? 'bg-primaryGold' : 'bg-softBorder'} `}
+                  className={`w-14 h-8 rounded-none transition-colors relative ${data.genZMode ? 'bg-primaryGold' : 'bg-softBorder'} `}
                 >
-                  <div className={`absolute top - 1 w - 6 h - 6 bg - white rounded - none shadow - md transition - transform duration - 300 ${data.genZMode ? 'left-7' : 'left-1'} `} />
+                  <div className={`absolute top-1 w-6 h-6 bg-white rounded-none shadow-md transition-transform duration-300 ${data.genZMode ? 'left-7' : 'left-1'} `} />
                 </button>
               </div>
             </div>

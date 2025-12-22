@@ -3,6 +3,7 @@ import { generateStudySet } from './services/geminiService';
 import { supabase, getProfile, upsertProfile, saveStudySet, getStudySets, deleteStudySet, deleteAllStudySets, submitFeedback } from './services/supabase';
 import { StudySet, InputType } from './types';
 import { LandingPage } from './components/LandingPage';
+import { NativeLanding } from './components/NativeLanding';
 import { AuthPage } from './components/AuthPage';
 import { Dashboard } from './components/Dashboard';
 import { StudyView } from './components/StudyView';
@@ -14,7 +15,7 @@ import { User } from '@supabase/supabase-js';
 import { usePostHog } from 'posthog-js/react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 
-type ViewType = 'loading' | 'landing' | 'auth' | 'onboarding' | 'dashboard' | 'study' | 'privacy' | 'terms' | 'disclaimer' | 'refund' | 'pricing';
+type ViewType = 'loading' | 'landing' | 'native_landing' | 'auth' | 'onboarding' | 'dashboard' | 'study' | 'privacy' | 'terms' | 'disclaimer' | 'refund' | 'pricing';
 
 const App: React.FC = () => {
   const posthog = usePostHog();
@@ -49,6 +50,11 @@ const App: React.FC = () => {
     if (path === '/refund') return 'refund';
     if (path === '/pricing') return 'pricing';
     if (path === '/access') return 'auth';
+
+    // Check if running in Capacitor native app
+    const isNative = (window as any).Capacitor?.isNativePlatform?.() ?? false;
+    if (isNative) return 'native_landing';
+
     return 'loading';
   };
 
@@ -133,7 +139,8 @@ const App: React.FC = () => {
         }
       } else if (!isLegalPage) {
         // Only redirect to landing if not on a legal page
-        setView('landing');
+        const isNative = (window as any).Capacitor?.isNativePlatform?.() ?? false;
+        setView(isNative ? 'native_landing' : 'landing');
       }
     });
 
@@ -167,6 +174,56 @@ const App: React.FC = () => {
     });
 
     return () => subscription.unsubscribe();
+  }, []);
+
+  // Handle deep links for OAuth callback (native app only)
+  useEffect(() => {
+    const setupDeepLinkListener = async () => {
+      const isNative = (window as any).Capacitor?.isNativePlatform?.() ?? false;
+      if (!isNative) return;
+
+      const { App } = await import('@capacitor/app');
+
+      // Handle deep links when app is opened via URL scheme
+      App.addListener('appUrlOpen', async (event) => {
+        console.log('[DeepLink] Received URL:', event.url);
+
+        // Check if this is an auth callback
+        if (event.url.includes('auth/callback') || event.url.includes('access_token')) {
+          // Extract the URL fragment (everything after #)
+          const urlFragment = event.url.split('#')[1];
+          if (urlFragment) {
+            // Parse the fragment as URL params
+            const params = new URLSearchParams(urlFragment);
+            const accessToken = params.get('access_token');
+            const refreshToken = params.get('refresh_token');
+
+            if (accessToken && refreshToken) {
+              console.log('[DeepLink] Setting session from tokens');
+              const { error } = await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken,
+              });
+
+              if (error) {
+                console.error('[DeepLink] Error setting session:', error);
+              } else {
+                console.log('[DeepLink] Session set successfully');
+                // Close the browser if it's still open
+                try {
+                  const { Browser } = await import('@capacitor/browser');
+                  await Browser.close();
+                } catch (e) {
+                  console.log('[DeepLink] Browser close skipped:', e);
+                }
+              }
+            }
+          }
+        }
+      });
+    };
+
+    setupDeepLinkListener();
   }, []);
 
   const loadUserData = async (userId: string) => {
@@ -206,6 +263,18 @@ const App: React.FC = () => {
   };
 
   const handleStart = () => setView('auth');
+
+  // Track successful checkout status from URL params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('status') === 'success') {
+      if (posthog) {
+        posthog.capture('checkout_success');
+      }
+      // Clean up URL to avoid redundant tracking or confusing the user
+      window.history.replaceState({}, '', window.location.origin);
+    }
+  }, [posthog]);
 
   const handleAuthComplete = async (userId: string, email: string) => {
     // Check if user has completed onboarding
@@ -393,6 +462,7 @@ const App: React.FC = () => {
     if (view === 'disclaimer') return <LegalPage type="disclaimer" onBack={handleLegalBack} />;
     if (view === 'refund') return <LegalPage type="refund" onBack={handleLegalBack} />;
     if (view === 'pricing') return <PricingPage onBack={handleLegalBack} />;
+    if (view === 'native_landing') return <NativeLanding onStart={() => setView('auth')} />;
     return <LandingPage onStart={() => setView('auth')} />;
   };
 

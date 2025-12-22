@@ -469,7 +469,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         },
         body: JSON.stringify({
           plan: isYearlyPlan ? 'yearly' : 'monthly',
-          returnUrl: window.location.href,
+          returnUrl: window.location.origin + '/?status=success',
           customerEmail: user?.email,
           userId: user?.id,
           // Use user name or fall back to email part
