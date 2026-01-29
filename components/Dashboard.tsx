@@ -381,7 +381,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onProcess, isProcess
               </button>
               <div className="flex items-center gap-2">
                  <div className="w-6 h-6 rounded-full bg-accentYellow shadow-sm"></div>
-                 <span className="font-bold text-lg dark:text-white tracking-tight">studywithai</span>
+                 <span className="font-bold text-lg dark:text-white tracking-tight">studymi</span>
               </div>
            </div>
 
@@ -805,7 +805,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onProcess, isProcess
             </button>
             
             <h2 className="text-2xl font-bold mb-2 dark:text-white">Thoughts?</h2>
-            <p className="text-steelGray dark:text-darkMuted text-sm mb-8">Help us make studywithai better for you.</p>
+            <p className="text-steelGray dark:text-darkMuted text-sm mb-8">Help us make studymi better for you.</p>
 
             <div className="flex justify-center gap-3 mb-8">
               {[1, 2, 3, 4, 5].map((star) => (

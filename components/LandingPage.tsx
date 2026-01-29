@@ -18,7 +18,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
       <nav className="w-full max-w-[1200px] mx-auto px-6 py-8 flex justify-between items-center animate-fade-in z-50 relative">
         <div className="flex items-center gap-3 cursor-pointer" onClick={onStart}>
           <div className="w-3 h-3 rounded-full bg-accentYellow shadow-[0_0_12px_rgba(255,228,77,0.4)]"></div>
-          <span className="text-xl font-bold tracking-tight text-deepNavy lowercase">studywithai</span>
+          <span className="text-xl font-bold tracking-tight text-deepNavy lowercase">studymi</span>
         </div>
         <div className="flex items-center gap-8">
           <button onClick={onStart} className="hidden md:block text-steelGray font-medium hover:text-deepNavy text-sm transition-colors">log in</button>
@@ -37,10 +37,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         {/* Main Headings */}
         <h1 className="text-5xl md:text-[80px] leading-[0.95] font-extrabold text-deepNavy mb-8 tracking-tighter lowercase">
           it's not cramming.<br />
-          it's just studywithai.
+          it's just studymi.
         </h1>
         <p className="text-steelGray text-lg md:text-xl max-w-lg mb-10 font-medium leading-relaxed">
-          your wise, witty ai built to help you explore your studies, notes, and complex topics.
+          your wise, witty ai built to help you master your studies, notes, and complex topics.
         </p>
         
         <button 
@@ -120,7 +120,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                <div>
                  <h3 className="text-3xl font-bold text-deepNavy mb-4 lowercase">whenever, wherever</h3>
                  <p className="text-steelGray text-lg leading-relaxed">
-                   never need a friend at 3 a.m. again. just start yapping with studywithai, your conversational ai for learning that's ready 24/7.
+                   never need a friend at 3 a.m. again. just start yapping with studymi, your conversational ai for learning that's ready 24/7.
                  </p>
                </div>
             </div>
@@ -135,7 +135,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                <div className="relative z-10">
                  <h3 className="text-3xl font-bold text-white mb-4 lowercase">safe & sound</h3>
                  <p className="text-white/70 text-lg leading-relaxed">
-                   spill all the tea — studywithai's got you. your sessions are secure and confidential.
+                   spill all the tea — studymi's got you. your sessions are secure and confidential.
                  </p>
                </div>
             </div>
@@ -148,7 +148,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                  </div>
                  <h3 className="text-3xl font-bold text-deepNavy mb-4 lowercase">remembers everything</h3>
                  <p className="text-steelGray text-lg leading-relaxed">
-                   studywithai keeps your whole story in mind. it learns from every conversation, getting to know you better.
+                   studymi keeps your whole story in mind. it learns from every conversation, getting to know you better.
                  </p>
                </div>
                
@@ -204,11 +204,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           
           <div className="space-y-2">
             {[
-              { q: "what is studywithai?", a: "it's an intelligent learning companion that helps you understand complex topics by teaching them back to you, quizzing you, and creating study aids." },
-              { q: "how does studywithai work?", a: "simply upload your notes, audio, or just type a topic. studywithai analyzes it and creates a personalized study plan with flashcards, mind maps, and quizzes." },
-              { q: "is studywithai a replacement for traditional therapy?", a: "no, studywithai is an educational tool designed for learning and study support, not a medical or psychological service." },
+              { q: "what is studymi?", a: "it's an intelligent learning companion that helps you understand complex topics by teaching them back to you, quizzing you, and creating study aids." },
+              { q: "how does studymi work?", a: "simply upload your notes, audio, or just type a topic. studymi analyzes it and creates a personalized study plan with flashcards, mind maps, and quizzes." },
+              { q: "is studymi a replacement for traditional therapy?", a: "no, studymi is an educational tool designed for learning and study support, not a medical or psychological service." },
               { q: "is my data secure and confidential?", a: "absolutely. your data is encrypted and private. we do not share your personal study materials with anyone." },
-              { q: "does studywithai support multiple languages?", a: "yes! studywithai can process and communicate in multiple languages to support your learning journey." }
+              { q: "does studymi support multiple languages?", a: "yes! studymi can process and communicate in multiple languages to support your learning journey." }
             ].map((item, i) => (
               <div key={i} className="border-b border-softBorder last:border-0">
                 <button 
@@ -235,13 +235,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
            <div className="col-span-1 md:col-span-2">
              <div className="flex items-center gap-2 mb-6">
                <div className="w-3 h-3 rounded-full bg-accentYellow"></div>
-               <span className="font-bold text-deepNavy lowercase text-xl tracking-tight">studywithai</span>
+               <span className="font-bold text-deepNavy lowercase text-xl tracking-tight">studymi</span>
              </div>
              <div className="max-w-xs">
                 <p className="text-steelGray font-medium">be heard. be understood. be better.</p>
              </div>
              <button onClick={onStart} className="mt-8 bg-accentYellow text-deepNavy px-8 py-3 rounded-full font-bold text-sm shadow-lg shadow-yellow-200/50 hover:scale-105 transition-transform">
-                try studywithai free
+                try studymi free
              </button>
            </div>
            
@@ -262,8 +262,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         </div>
         
         <div className="max-w-[1200px] mx-auto px-6 mt-20 pt-8 border-t border-softBorder flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-bold text-steelGray/40 uppercase tracking-widest">
-           <span>© 2025 studywithai inc</span>
-           <span>by dennis han & vlady nyz</span>
+           <span>© 2025 studymi</span>
+           <span>by allen joseph</span>
         </div>
       </footer>
     </div>
