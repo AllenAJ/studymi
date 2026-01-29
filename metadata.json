@@ -1,0 +1,7 @@
+{
+  "name": "studywithai",
+  "description": "Master any topic by teaching it. Upload lectures or notes, and get instant summaries, quizzes, flashcards, and a platform to practice the Feynman technique.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
