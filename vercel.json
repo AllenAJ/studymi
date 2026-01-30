@@ -16,6 +16,7 @@
       "destination": "/index.html"
     },
     {
+      "source": "/disclaimer",
       "destination": "/index.html"
     },
     {
