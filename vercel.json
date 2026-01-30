@@ -16,7 +16,14 @@
       "destination": "/index.html"
     },
     {
-      "source": "/disclaimer",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/refund",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/pricing",
       "destination": "/index.html"
     }
   ],

@@ -56,7 +56,7 @@ export const StudyView: React.FC<StudyViewProps> = ({ studySet, onBack }) => {
 
   const SidebarContent = () => (
     <>
-      <button onClick={onBack} className="w-10 h-10 rounded-full bg-iceGray dark:bg-darkBorder hover:bg-softBorder dark:hover:bg-darkBorder/80 flex items-center justify-center text-deepNavy dark:text-white mb-8 transition-colors">
+      <button onClick={onBack} className="w-10 h-10 rounded-none bg-iceGray dark:bg-darkBorder hover:bg-softBorder dark:hover:bg-darkBorder/80 flex items-center justify-center text-deepNavy dark:text-white mb-8 transition-colors">
         <ArrowLeft className="w-5 h-5" />
       </button>
 
@@ -70,7 +70,7 @@ export const StudyView: React.FC<StudyViewProps> = ({ studySet, onBack }) => {
             <button
               key={tab.id}
               onClick={() => { setActiveTab(tab.id as any); setIsMobileMenuOpen(false); }}
-              className={`flex lg:flex-col items-center gap-4 lg:gap-2 justify-start lg:justify-center p-3 lg:p-4 rounded-xl transition-all duration-200 ${isActive ? 'bg-black/5 dark:bg-white/10 text-deepNavy dark:text-white font-bold' : 'text-steelGray dark:text-darkMuted hover:bg-white dark:hover:bg-darkBorder hover:text-deepNavy dark:hover:text-white'}`}
+              className={`flex lg:flex-col items-center gap-4 lg:gap-2 justify-start lg:justify-center p-3 lg:p-4 rounded-none transition-all duration-200 ${isActive ? 'bg-black/5 dark:bg-white/10 text-deepNavy dark:text-white font-bold' : 'text-steelGray dark:text-darkMuted hover:bg-white dark:hover:bg-darkBorder hover:text-deepNavy dark:hover:text-white'}`}
             >
               <tab.icon className={`w-5 h-5 lg:w-6 lg:h-6 ${isActive ? 'stroke-2' : 'stroke-[1.5]'}`} />
               <span className="text-sm lg:text-[10px] lg:uppercase lg:tracking-wide lg:mt-2">{tab.label}</span>
@@ -105,7 +105,7 @@ export const StudyView: React.FC<StudyViewProps> = ({ studySet, onBack }) => {
         <div className="fixed inset-0 z-[100] lg:hidden">
           <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
           <div className="absolute right-0 top-0 bottom-0 w-64 bg-white dark:bg-darkBg border-l border-softBorder dark:border-darkBorder p-6 animate-slide-right shadow-2xl flex flex-col items-start">
-            <button onClick={() => setIsMobileMenuOpen(false)} className="self-end mb-6 p-2 bg-iceGray dark:bg-darkBorder rounded-full">
+            <button onClick={() => setIsMobileMenuOpen(false)} className="self-end mb-6 p-2 bg-iceGray dark:bg-darkBorder rounded-none">
               <X className="w-5 h-5 text-steelGray" />
             </button>
             <SidebarContent />
@@ -119,17 +119,17 @@ export const StudyView: React.FC<StudyViewProps> = ({ studySet, onBack }) => {
         <div className="flex justify-end gap-3 mb-6">
           <button
             onClick={() => setIsDarkMode(!isDarkMode)}
-            className="w-10 h-10 rounded-full bg-white dark:bg-darkCard border border-softBorder dark:border-darkBorder flex items-center justify-center shadow-sm hover:scale-105 transition-transform text-steelGray dark:text-white"
+            className="w-10 h-10 rounded-none bg-white dark:bg-darkCard border border-softBorder dark:border-darkBorder flex items-center justify-center shadow-sm hover:scale-105 transition-transform text-steelGray dark:text-white"
           >
             {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
           </button>
-          <div className="flex items-center gap-3 bg-white/60 dark:bg-darkCard backdrop-blur-sm px-3 py-2 rounded-full border border-softBorder dark:border-darkBorder shadow-sm">
+          <div className="flex items-center gap-3 bg-white/60 dark:bg-darkCard backdrop-blur-sm px-3 py-2 rounded-none border border-softBorder dark:border-darkBorder shadow-sm">
             <span className="text-xs font-bold text-deepNavy dark:text-darkText hidden sm:inline ml-1">gen z mode</span>
             <button
               onClick={() => setIsGenZMode(!isGenZMode)}
-              className={`w-10 h-6 rounded-full transition-colors relative ${isGenZMode ? 'bg-primaryGold' : 'bg-softBorder dark:bg-darkBorder'}`}
+              className={`w-10 h-6 rounded-none transition-colors relative ${isGenZMode ? 'bg-primaryGold' : 'bg-softBorder dark:bg-darkBorder'}`}
             >
-              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-transform duration-300 ${isGenZMode ? 'left-5' : 'left-1'}`} />
+              <div className={`absolute top-1 w-4 h-4 bg-white rounded-none shadow-md transition-transform duration-300 ${isGenZMode ? 'left-5' : 'left-1'}`} />
             </button>
           </div>
         </div>
@@ -137,7 +137,7 @@ export const StudyView: React.FC<StudyViewProps> = ({ studySet, onBack }) => {
         <div className="max-w-6xl mx-auto animate-slide-up">
           {/* Header (Desktop) */}
           <div className="mb-10 hidden lg:block">
-            <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white dark:bg-darkCard border border-softBorder dark:border-darkBorder text-xs font-bold text-steelGray dark:text-darkMuted mb-6 uppercase tracking-widest shadow-sm">
+            <div className="inline-flex items-center px-4 py-1.5 rounded-none bg-white dark:bg-darkCard border border-softBorder dark:border-darkBorder text-xs font-bold text-steelGray dark:text-darkMuted mb-6 uppercase tracking-widest shadow-sm">
               study session
             </div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-deepNavy dark:text-white leading-tight tracking-tight">{studySet.title}</h1>
@@ -147,7 +147,7 @@ export const StudyView: React.FC<StudyViewProps> = ({ studySet, onBack }) => {
           <div className="animate-fade-in pb-20">
             {activeTab === 'summary' && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 bg-white dark:bg-darkCard rounded-[40px] p-8 md:p-10 border border-softBorder dark:border-darkBorder shadow-soft">
+                <div className="lg:col-span-2 bg-white dark:bg-darkCard rounded-none p-8 md:p-10 border border-softBorder dark:border-darkBorder shadow-soft">
                   <h2 className="text-2xl font-bold mb-8 flex items-center gap-3 dark:text-white text-deepNavy">
                     <BookOpen className="w-6 h-6 text-primaryGold fill-primaryGold/20" />
                     The Breakdown
@@ -157,9 +157,9 @@ export const StudyView: React.FC<StudyViewProps> = ({ studySet, onBack }) => {
                   </div>
                 </div>
 
-                <div className="bg-deepNavy dark:bg-darkCard rounded-[40px] p-8 md:p-10 text-white shadow-xl h-fit border border-transparent dark:border-darkBorder">
+                <div className="bg-deepNavy dark:bg-darkCard rounded-none p-8 md:p-10 text-white shadow-xl h-fit border border-transparent dark:border-darkBorder">
                   <h3 className="font-bold text-xl mb-8 flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-accentYellow"></div>
+                    <div className="w-2 h-2 rounded-none bg-accentYellow"></div>
                     Key Concepts
                   </h3>
                   <ul className="space-y-6">

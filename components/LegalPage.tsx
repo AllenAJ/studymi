@@ -1,7 +1,7 @@
 import React from 'react';
-import { ArrowLeft, Shield, FileText, Sparkles, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Shield, FileText, Sparkles, ExternalLink, Receipt } from 'lucide-react';
 
-type LegalPageType = 'privacy' | 'terms' | 'disclaimer';
+type LegalPageType = 'privacy' | 'terms' | 'disclaimer' | 'refund';
 
 interface LegalPageProps {
     type: LegalPageType;
@@ -111,7 +111,7 @@ You can manage cookie preferences in the Settings page.`
             sections: [
                 {
                     title: 'Agreement to Terms',
-                    content: `By accessing or using Studymi, you agree to be bound by these Terms of Service. If you disagree with any part of these terms, you may not access our service.`
+                    content: `By accessing or using Studymi, operated by POINK TECHNOLOGIES PRIVATE LIMITED ("we," "our," or "us"), you agree to be bound by these Terms of Service. If you disagree with any part of these terms, you may not access our service.`
                 },
                 {
                     title: 'Description of Service',
@@ -303,6 +303,46 @@ We appreciate your help in making Studymi better!`
                     content: `By using Studymi, you confirm that you have read, understood, and agree to this AI Disclaimer. If you do not agree with these terms, please do not use our AI-powered features.`
                 }
             ]
+        },
+        refund: {
+            title: 'Refund Policy',
+            icon: Receipt,
+            lastUpdated: 'December 8, 2024',
+            sections: [
+                {
+                    title: 'Subscription Cancellations',
+                    content: `You may cancel your subscription at any time. Cancellation will take effect at the end of the current billing period. You will continue to have access to paid features until the end of your billing cycle.`
+                },
+                {
+                    title: 'Refund Eligibility',
+                    content: `We offer refunds in the following specific cases:
+• Technical Issues: If the service was unusable due to technical faults on our end.
+• Accidental Purchase: If you contact us within 24 hours of the initial subscription purchase.
+• Duplicate Charges: If you were billed multiple times for the same period.
+
+We generally do NOT provide refunds for:
+• Change of mind
+• Unused subscription time
+• Failure to cancel before renewal`
+                },
+                {
+                    title: 'How to Request a Refund',
+                    content: `To request a refund, please contact our support team at:
+• Email: allenxavier45@gmail.com
+• Subject: Refund Request - [Your Email]
+
+Please include your transaction ID or the email address used for the account.`
+                },
+                {
+                    title: 'Processing Time',
+                    content: `Refund requests are reviewed within 3-5 business days. If approved, the refund will be processed to your original payment method. Depending on your bank, it may take an additional 5-10 business days for the funds to appear in your account.`
+                },
+                {
+                    title: 'Contact Us',
+                    content: `POINK TECHNOLOGIES PRIVATE LIMITED
+Email: allenxavier45@gmail.com`
+                }
+            ]
         }
     };
 
@@ -316,12 +356,12 @@ We appreciate your help in making Studymi better!`
                 <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
                     <button
                         onClick={onBack}
-                        className="p-2 rounded-full hover:bg-iceGray dark:hover:bg-darkCard transition-colors"
+                        className="p-2 rounded-none hover:bg-iceGray dark:hover:bg-darkCard transition-colors"
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </button>
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primaryGold/10 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-none bg-primaryGold/10 flex items-center justify-center">
                             <Icon className="w-4 h-4 text-primaryGold" />
                         </div>
                         <h1 className="text-xl font-bold dark:text-white">{page.title}</h1>
@@ -331,7 +371,7 @@ We appreciate your help in making Studymi better!`
 
             {/* Content */}
             <main className="max-w-4xl mx-auto px-6 py-12">
-                <div className="bg-white dark:bg-darkCard rounded-[32px] p-8 md:p-12 border border-softBorder dark:border-darkBorder shadow-soft">
+                <div className="bg-white dark:bg-darkCard rounded-none p-8 md:p-12 border border-softBorder dark:border-darkBorder shadow-soft">
 
                     {/* Last Updated */}
                     <p className="text-sm text-steelGray dark:text-darkMuted mb-8">
@@ -360,21 +400,27 @@ We appreciate your help in making Studymi better!`
                         </h3>
                         <div className="flex flex-wrap gap-3">
                             {type !== 'privacy' && (
-                                <a href="/privacy" className="flex items-center gap-2 px-4 py-2 bg-iceGray dark:bg-darkBorder rounded-full text-sm font-medium hover:bg-softBorder dark:hover:bg-darkBorder/80 transition-colors">
+                                <a href="/privacy" className="flex items-center gap-2 px-4 py-2 bg-iceGray dark:bg-darkBorder rounded-none text-sm font-medium hover:bg-softBorder dark:hover:bg-darkBorder/80 transition-colors">
                                     <Shield className="w-4 h-4" />
                                     Privacy Policy
                                 </a>
                             )}
                             {type !== 'terms' && (
-                                <a href="/terms" className="flex items-center gap-2 px-4 py-2 bg-iceGray dark:bg-darkBorder rounded-full text-sm font-medium hover:bg-softBorder dark:hover:bg-darkBorder/80 transition-colors">
+                                <a href="/terms" className="flex items-center gap-2 px-4 py-2 bg-iceGray dark:bg-darkBorder rounded-none text-sm font-medium hover:bg-softBorder dark:hover:bg-darkBorder/80 transition-colors">
                                     <FileText className="w-4 h-4" />
                                     Terms of Service
                                 </a>
                             )}
                             {type !== 'disclaimer' && (
-                                <a href="/disclaimer" className="flex items-center gap-2 px-4 py-2 bg-iceGray dark:bg-darkBorder rounded-full text-sm font-medium hover:bg-softBorder dark:hover:bg-darkBorder/80 transition-colors">
+                                <a href="/disclaimer" className="flex items-center gap-2 px-4 py-2 bg-iceGray dark:bg-darkBorder rounded-none text-sm font-medium hover:bg-softBorder dark:hover:bg-darkBorder/80 transition-colors">
                                     <Sparkles className="w-4 h-4" />
                                     AI Disclaimer
+                                </a>
+                            )}
+                            {type !== 'refund' && (
+                                <a href="/refund" className="flex items-center gap-2 px-4 py-2 bg-iceGray dark:bg-darkBorder rounded-none text-sm font-medium hover:bg-softBorder dark:hover:bg-darkBorder/80 transition-colors">
+                                    <Receipt className="w-4 h-4" />
+                                    Refund Policy
                                 </a>
                             )}
                         </div>
@@ -384,7 +430,7 @@ We appreciate your help in making Studymi better!`
                     <div className="mt-8 text-center">
                         <button
                             onClick={onBack}
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-deepNavy dark:bg-white text-white dark:text-deepNavy font-bold rounded-full hover:opacity-90 transition-opacity"
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-deepNavy dark:bg-white text-white dark:text-deepNavy font-bold rounded-none hover:opacity-90 transition-opacity"
                         >
                             <ArrowLeft className="w-4 h-4" />
                             Back to Studymi
@@ -401,7 +447,11 @@ We appreciate your help in making Studymi better!`
                     <span>•</span>
                     <a href="/terms" className="hover:text-deepNavy dark:hover:text-white transition-colors">Terms</a>
                     <span>•</span>
+                    <a href="/terms" className="hover:text-deepNavy dark:hover:text-white transition-colors">Terms</a>
+                    <span>•</span>
                     <a href="/disclaimer" className="hover:text-deepNavy dark:hover:text-white transition-colors">AI Disclaimer</a>
+                    <span>•</span>
+                    <a href="/refund" className="hover:text-deepNavy dark:hover:text-white transition-colors">Refund Policy</a>
                 </div>
             </footer>
         </div>

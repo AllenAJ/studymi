@@ -209,21 +209,21 @@ export const MindMapView: React.FC<MindMapViewProps> = ({ data }) => {
       <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
         <button 
           onClick={handleZoomIn}
-          className="w-10 h-10 bg-white dark:bg-darkCard rounded-xl border border-softBorder dark:border-darkBorder shadow-sm flex items-center justify-center text-deepNavy dark:text-white hover:bg-iceGray dark:hover:bg-darkBorder transition-colors"
+          className="w-10 h-10 bg-white dark:bg-darkCard rounded-none border border-softBorder dark:border-darkBorder shadow-sm flex items-center justify-center text-deepNavy dark:text-white hover:bg-iceGray dark:hover:bg-darkBorder transition-colors"
           title="Zoom In"
         >
           <ZoomIn className="w-5 h-5" />
         </button>
         <button 
           onClick={handleZoomOut}
-          className="w-10 h-10 bg-white dark:bg-darkCard rounded-xl border border-softBorder dark:border-darkBorder shadow-sm flex items-center justify-center text-deepNavy dark:text-white hover:bg-iceGray dark:hover:bg-darkBorder transition-colors"
+          className="w-10 h-10 bg-white dark:bg-darkCard rounded-none border border-softBorder dark:border-darkBorder shadow-sm flex items-center justify-center text-deepNavy dark:text-white hover:bg-iceGray dark:hover:bg-darkBorder transition-colors"
           title="Zoom Out"
         >
           <ZoomOut className="w-5 h-5" />
         </button>
         <button 
           onClick={handleReset}
-          className="w-10 h-10 bg-white dark:bg-darkCard rounded-xl border border-softBorder dark:border-darkBorder shadow-sm flex items-center justify-center text-deepNavy dark:text-white hover:bg-iceGray dark:hover:bg-darkBorder transition-colors"
+          className="w-10 h-10 bg-white dark:bg-darkCard rounded-none border border-softBorder dark:border-darkBorder shadow-sm flex items-center justify-center text-deepNavy dark:text-white hover:bg-iceGray dark:hover:bg-darkBorder transition-colors"
           title="Reset View"
         >
           <Maximize2 className="w-5 h-5" />
@@ -231,18 +231,18 @@ export const MindMapView: React.FC<MindMapViewProps> = ({ data }) => {
       </div>
 
       {/* Zoom Level Indicator */}
-      <div className="absolute bottom-4 left-4 z-10 bg-white/80 dark:bg-darkCard/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-softBorder dark:border-darkBorder text-xs font-bold text-steelGray dark:text-darkMuted">
+      <div className="absolute bottom-4 left-4 z-10 bg-white/80 dark:bg-darkCard/80 backdrop-blur-sm px-3 py-1.5 rounded-none border border-softBorder dark:border-darkBorder text-xs font-bold text-steelGray dark:text-darkMuted">
         {Math.round(zoomLevel * 100)}%
       </div>
 
       {/* Instructions */}
-      <div className="absolute bottom-4 right-4 z-10 flex items-center gap-2 bg-white/80 dark:bg-darkCard/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-softBorder dark:border-darkBorder text-xs text-steelGray dark:text-darkMuted">
+      <div className="absolute bottom-4 right-4 z-10 flex items-center gap-2 bg-white/80 dark:bg-darkCard/80 backdrop-blur-sm px-3 py-1.5 rounded-none border border-softBorder dark:border-darkBorder text-xs text-steelGray dark:text-darkMuted">
         <Move className="w-3 h-3" />
         <span>Drag to pan • Scroll to zoom</span>
       </div>
 
       {/* SVG Container */}
-      <div className="w-full overflow-hidden bg-white dark:bg-darkCard rounded-[32px] shadow-soft border border-softBorder dark:border-darkBorder">
+      <div className="w-full overflow-hidden bg-white dark:bg-darkCard rounded-none shadow-soft border border-softBorder dark:border-darkBorder">
         <svg ref={svgRef} className="w-full h-[550px]"></svg>
       </div>
     </div>

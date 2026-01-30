@@ -1,9 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, FileText, Sparkles, Clock, ThumbsUp, Home, ArrowRight, X, Star, Settings, Upload, Youtube, Moon, Sun, Crown, Info, Trash2, ToggleLeft, ToggleRight, Menu, BarChart2, Calendar, BookOpen, Layers, CheckCircle2 } from 'lucide-react';
+import { Mic, FileText, Sparkles, Clock, ThumbsUp, Home, ArrowRight, X, Star, Settings, Upload, Youtube, Moon, Sun, Crown, Info, Trash2, ToggleLeft, ToggleRight, Menu, BarChart2, Calendar, BookOpen, Layers, CheckCircle2, Lock } from 'lucide-react';
 import { InputType, StudySet } from '../types';
 
+// Free tier limit
+const FREE_TIER_LIMIT = 3;
+
 interface DashboardProps {
-  user: string;
+  user: any;
   onProcess: (content: string, type: InputType, mimeType?: string, genZMode?: boolean) => void;
   isProcessing: boolean;
   onLogout: () => void;
@@ -14,6 +17,7 @@ interface DashboardProps {
   onResetHistory?: () => void;
   onDeleteAccount?: () => void;
   initialGenZMode?: boolean;
+  isPremium?: boolean;
 }
 
 // Activity Bar Chart Component - Now uses real data
@@ -47,9 +51,9 @@ const ActivityChart: React.FC<{ history: StudySet[] }> = ({ history }) => {
     <div className="flex items-end justify-between h-48 w-full gap-2 pt-4">
       {days.map((day, i) => (
         <div key={i} className="flex flex-col items-center gap-2 flex-1 group cursor-pointer">
-          <div className="relative w-full max-w-[24px] h-full bg-iceGray dark:bg-darkBorder rounded-full overflow-hidden">
+          <div className="relative w-full max-w-[24px] h-full bg-iceGray dark:bg-darkBorder rounded-none overflow-hidden">
             <div
-              className="absolute bottom-0 left-0 right-0 bg-primaryGold rounded-full transition-all duration-500 group-hover:bg-deepNavy dark:group-hover:bg-white"
+              className="absolute bottom-0 left-0 right-0 bg-primaryGold rounded-none transition-all duration-500 group-hover:bg-deepNavy dark:group-hover:bg-white"
               style={{ height: `${Math.max(values[i], 5)}%` }}
             ></div>
           </div>
@@ -87,13 +91,13 @@ const StatsCard: React.FC<{ history: StudySet[] }> = ({ history }) => {
   return (
     <div className="flex flex-col gap-6">
       {/* Study Sets Stat */}
-      <div className="bg-white dark:bg-darkCard rounded-[32px] p-8 border border-softBorder dark:border-darkBorder shadow-soft flex-1 flex flex-col justify-between">
+      <div className="bg-white dark:bg-darkCard rounded-none p-8 border border-softBorder dark:border-darkBorder shadow-soft flex-1 flex flex-col justify-between">
         <div className="flex justify-between items-start mb-4">
-          <div className="p-3 bg-blue-50 dark:bg-blue-900/10 rounded-2xl">
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/10 rounded-none">
             <BookOpen className="w-6 h-6 text-blue-500" />
           </div>
           {percentChange !== 0 && (
-            <span className={`text-xs font-bold px-2 py-1 rounded-full ${percentChange > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+            <span className={`text-xs font-bold px-2 py-1 rounded-none ${percentChange > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
               {percentChange > 0 ? '+' : ''}{percentChange}%
             </span>
           )}
@@ -105,9 +109,9 @@ const StatsCard: React.FC<{ history: StudySet[] }> = ({ history }) => {
       </div>
 
       {/* Flashcards Stat */}
-      <div className="bg-white dark:bg-darkCard rounded-[32px] p-8 border border-softBorder dark:border-darkBorder shadow-soft flex-1 flex flex-col justify-between">
+      <div className="bg-white dark:bg-darkCard rounded-none p-8 border border-softBorder dark:border-darkBorder shadow-soft flex-1 flex flex-col justify-between">
         <div className="flex justify-between items-start mb-4">
-          <div className="p-3 bg-purple-50 dark:bg-purple-900/10 rounded-2xl">
+          <div className="p-3 bg-purple-50 dark:bg-purple-900/10 rounded-none">
             <Layers className="w-6 h-6 text-purple-500" />
           </div>
         </div>
@@ -118,9 +122,9 @@ const StatsCard: React.FC<{ history: StudySet[] }> = ({ history }) => {
       </div>
 
       {/* Quiz Questions Stat */}
-      <div className="bg-white dark:bg-darkCard rounded-[32px] p-8 border border-softBorder dark:border-darkBorder shadow-soft flex-1 flex flex-col justify-between">
+      <div className="bg-white dark:bg-darkCard rounded-none p-8 border border-softBorder dark:border-darkBorder shadow-soft flex-1 flex flex-col justify-between">
         <div className="flex justify-between items-start mb-4">
-          <div className="p-3 bg-green-50 dark:bg-green-900/10 rounded-2xl">
+          <div className="p-3 bg-green-50 dark:bg-green-900/10 rounded-none">
             <CheckCircle2 className="w-6 h-6 text-green-500" />
           </div>
         </div>
@@ -144,12 +148,24 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onSubmitFeedback,
   onResetHistory,
   onDeleteAccount,
-  initialGenZMode = false
+  initialGenZMode = false,
+  isPremium = false
 }) => {
   const [activeTab, setActiveTab] = useState<'home' | 'insights' | 'settings' | 'history'>('home');
-  const [activeModal, setActiveModal] = useState<'voice' | 'text' | 'upload' | 'link' | 'feedback' | 'confirmDelete' | 'confirmReset' | 'confirmDeleteAccount' | null>(null);
+  const [activeModal, setActiveModal] = useState<'voice' | 'text' | 'upload' | 'link' | 'feedback' | 'confirmDelete' | 'confirmReset' | 'confirmDeleteAccount' | 'upgrade' | null>(null);
   const [textInput, setTextInput] = useState('');
   const [isRecording, setIsRecording] = useState(false);
+
+  // Check if user has reached free tier limit
+  const [hasReachedLimit, setHasReachedLimit] = useState(false);
+  const [remainingFreeNotes, setRemainingFreeNotes] = useState(0);
+
+  useEffect(() => {
+    setHasReachedLimit(!isPremium && history.length >= FREE_TIER_LIMIT);
+    // Calc remaining
+    const remaining = Math.max(0, FREE_TIER_LIMIT - history.length);
+    setRemainingFreeNotes(isPremium ? 9999 : remaining);
+  }, [history, isPremium]);
 
   // Initialize settings from localStorage
   const [isGenZMode, setIsGenZMode] = useState(() => {
@@ -173,6 +189,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   // Loading State
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
 
   // Settings State - Initialize from localStorage
@@ -293,6 +310,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
     }
   }, [isProcessing]);
 
+  // Wrapper function to check free tier limit before processing
+  const processWithLimitCheck = (content: string, type: InputType, mimeType?: string, isGenZ?: boolean) => {
+    if (!isPremium && hasReachedLimit) {
+      setActiveModal('upgrade');
+      return;
+    }
+    onProcess(content, type, mimeType, isGenZ);
+  };
+
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -313,7 +339,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         reader.onloadend = () => {
           const base64data = reader.result as string;
           const base64Content = base64data.split(',')[1];
-          onProcess(base64Content, 'audio', 'audio/wav', isGenZMode);
+          processWithLimitCheck(base64Content, 'audio', 'audio/wav', isGenZMode);
           setActiveModal(null);
         };
         stream.getTracks().forEach(track => track.stop());
@@ -336,9 +362,41 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const handleTextSubmit = () => {
     if (textInput.trim()) {
-      onProcess(textInput.trim(), activeModal === 'link' ? 'youtube' : 'text', undefined, isGenZMode);
+      processWithLimitCheck(textInput.trim(), activeModal === 'link' ? 'youtube' : 'text', undefined, isGenZMode);
       setActiveModal(null);
       setTextInput('');
+    }
+  };
+
+
+
+  const handleUpgrade = async () => {
+    setIsCheckingOut(true);
+    try {
+      const response = await fetch('/api/payment/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan: isYearlyPlan ? 'yearly' : 'monthly',
+          returnUrl: window.location.href,
+          customerEmail: user?.email,
+          userId: user?.id,
+          // Use user name or fall back to email part
+          customerName: user?.user_metadata?.full_name || user?.email?.split('@')[0],
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Checkout failed');
+
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url;
+      }
+    } catch (error) {
+      console.error('Upgrade failed:', error);
+      alert('Failed to start checkout. Please try again.');
+    } finally {
+      setIsCheckingOut(false);
     }
   };
 
@@ -352,7 +410,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       const mimeType = file.type;
       const type: InputType = mimeType.includes('audio') ? 'audio' : 'pdf';
 
-      onProcess(base64String, type, mimeType, isGenZMode);
+      processWithLimitCheck(base64String, type, mimeType, isGenZMode);
       setActiveModal(null);
     };
     reader.readAsDataURL(file);
@@ -416,7 +474,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="flex flex-col gap-2 flex-1 w-full px-4">
           <button
             onClick={() => { setActiveTab('home'); setIsSidebarOpen(false); }}
-            className={`flex items-center gap-4 p-3.5 rounded-xl transition-all duration-200 ${activeTab === 'home' ? 'bg-black/5 dark:bg-white/10 text-deepNavy dark:text-white font-bold' : 'text-steelGray dark:text-darkMuted hover:bg-iceGray dark:hover:bg-darkBorder/50'}`}
+            className={`flex items-center gap-4 p-3.5 rounded-none transition-all duration-200 ${activeTab === 'home' ? 'bg-black/5 dark:bg-white/10 text-deepNavy dark:text-white font-bold' : 'text-steelGray dark:text-darkMuted hover:bg-iceGray dark:hover:bg-darkBorder/50'}`}
           >
             <Home className="w-5 h-5" />
             <span className="lg:hidden text-sm">Home</span>
@@ -424,7 +482,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           <button
             onClick={() => { setActiveTab('insights'); setIsSidebarOpen(false); }}
-            className={`flex items-center gap-4 p-3.5 rounded-xl transition-all duration-200 ${activeTab === 'insights' ? 'bg-black/5 dark:bg-white/10 text-deepNavy dark:text-white font-bold' : 'text-steelGray dark:text-darkMuted hover:bg-iceGray dark:hover:bg-darkBorder/50'}`}
+            className={`flex items-center gap-4 p-3.5 rounded-none transition-all duration-200 ${activeTab === 'insights' ? 'bg-black/5 dark:bg-white/10 text-deepNavy dark:text-white font-bold' : 'text-steelGray dark:text-darkMuted hover:bg-iceGray dark:hover:bg-darkBorder/50'}`}
           >
             <BarChart2 className="w-5 h-5" />
             <span className="lg:hidden text-sm">Insights</span>
@@ -432,7 +490,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           <button
             onClick={() => { setActiveTab('history'); setIsSidebarOpen(false); }}
-            className={`flex items-center gap-4 p-3.5 rounded-xl transition-all duration-200 ${activeTab === 'history' ? 'bg-black/5 dark:bg-white/10 text-deepNavy dark:text-white font-bold' : 'text-steelGray dark:text-darkMuted hover:bg-iceGray dark:hover:bg-darkBorder/50'}`}
+            className={`flex items-center gap-4 p-3.5 rounded-none transition-all duration-200 ${activeTab === 'history' ? 'bg-black/5 dark:bg-white/10 text-deepNavy dark:text-white font-bold' : 'text-steelGray dark:text-darkMuted hover:bg-iceGray dark:hover:bg-darkBorder/50'}`}
           >
             <Clock className="w-5 h-5" />
             <span className="lg:hidden text-sm">History</span>
@@ -440,7 +498,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           <button
             onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }}
-            className={`flex items-center gap-4 p-3.5 rounded-xl transition-all duration-200 ${activeTab === 'settings' ? 'bg-black/5 dark:bg-white/10 text-deepNavy dark:text-white font-bold' : 'text-steelGray dark:text-darkMuted hover:bg-iceGray dark:hover:bg-darkBorder/50'}`}
+            className={`flex items-center gap-4 p-3.5 rounded-none transition-all duration-200 ${activeTab === 'settings' ? 'bg-black/5 dark:bg-white/10 text-deepNavy dark:text-white font-bold' : 'text-steelGray dark:text-darkMuted hover:bg-iceGray dark:hover:bg-darkBorder/50'}`}
           >
             <Settings className="w-5 h-5" />
             <span className="lg:hidden text-sm">Settings</span>
@@ -451,7 +509,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* Upgrade Button */}
           <button
             onClick={() => { setActiveModal('upgrade'); setIsSidebarOpen(false); }}
-            className="flex items-center gap-3 p-3.5 rounded-xl border border-softBorder dark:border-darkBorder text-deepNavy dark:text-white hover:bg-iceGray dark:hover:bg-darkBorder/50 transition-colors"
+            className="flex items-center gap-3 p-3.5 rounded-none border border-softBorder dark:border-darkBorder text-deepNavy dark:text-white hover:bg-iceGray dark:hover:bg-darkBorder/50 transition-colors"
           >
             <Crown className="w-5 h-5 text-primaryGold" />
             <span className="lg:hidden text-sm font-medium">Upgrade plan</span>
@@ -459,7 +517,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           <button
             onClick={() => { setActiveModal('feedback'); setIsSidebarOpen(false); }}
-            className="flex items-center gap-4 p-3.5 rounded-xl text-steelGray dark:text-darkMuted hover:bg-iceGray dark:hover:bg-darkBorder/50 transition-colors"
+            className="flex items-center gap-4 p-3.5 rounded-none text-steelGray dark:text-darkMuted hover:bg-iceGray dark:hover:bg-darkBorder/50 transition-colors"
           >
             <ThumbsUp className="w-5 h-5" />
             <span className="lg:hidden text-sm">Feedback</span>
@@ -469,7 +527,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           <button
             onClick={onLogout}
-            className="flex items-center gap-4 p-3.5 rounded-xl text-steelGray dark:text-darkMuted hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+            className="flex items-center gap-4 p-3.5 rounded-none text-steelGray dark:text-darkMuted hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
           >
             <ArrowRight className="w-5 h-5 rotate-180" />
             <span className="lg:hidden text-sm font-medium">Log Out</span>
@@ -503,7 +561,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* Top Controls Bar */}
         <div className="flex justify-between items-center mb-10">
           <div className="flex items-center gap-4 lg:hidden">
-            <button onClick={() => setIsSidebarOpen(true)} className="p-2 -ml-2 text-deepNavy dark:text-white hover:bg-white/50 dark:hover:bg-darkCard rounded-full transition-colors">
+            <button onClick={() => setIsSidebarOpen(true)} className="p-2 -ml-2 text-deepNavy dark:text-white hover:bg-white/50 dark:hover:bg-darkCard rounded-none transition-colors">
               <Menu className="w-6 h-6" />
             </button>
             <div className="flex items-center gap-2">
@@ -518,41 +576,43 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {/* Compact Upgrade Button */}
             <button
               onClick={() => setActiveModal('upgrade')}
-              className="hidden sm:flex items-center gap-2 bg-deepNavy dark:bg-white text-white dark:text-deepNavy font-bold text-sm pl-3 pr-4 py-2.5 rounded-full shadow-sm hover:shadow-md hover:opacity-90 transition-all"
+              className="hidden sm:flex items-center gap-2 bg-deepNavy dark:bg-white text-white dark:text-deepNavy font-bold text-sm pl-3 pr-4 py-2.5 rounded-none shadow-sm hover:shadow-md hover:opacity-90 transition-all"
             >
               <Crown className="w-4 h-4" />
               <span className="hidden md:inline">Upgrade plan</span>
             </button>
 
-            {/* Usage Indicator */}
-            <div className="hidden md:flex items-center gap-2 bg-white dark:bg-darkCard px-3 py-2 rounded-full border border-softBorder dark:border-darkBorder shadow-sm">
-              <div className="flex items-center gap-1.5">
-                <div className="flex gap-0.5">
-                  {[0, 1, 2].map((i) => (
+            {/* Free Tier Indicator */}
+            <div className="hidden md:flex items-center gap-3 bg-white dark:bg-darkCard px-4 py-2 rounded-none border border-softBorder dark:border-darkBorder shadow-sm">
+              <span className="text-xs font-bold text-deepNavy dark:text-white uppercase tracking-wider">Free Plan</span>
+              <div className="h-4 w-[1px] bg-softBorder dark:bg-darkBorder"></div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-steelGray dark:text-darkMuted">{remainingFreeNotes} left</span>
+                <div className="flex gap-1">
+                  {[...Array(FREE_TIER_LIMIT)].map((_, i) => (
                     <div
                       key={i}
-                      className={`w-2 h-2 rounded-full ${i < history.length ? 'bg-primaryGold' : 'bg-softBorder dark:bg-darkBorder'}`}
+                      className={`w-2 h-2 rounded-none transition-colors ${i < (FREE_TIER_LIMIT - remainingFreeNotes) ? 'bg-steelGray dark:bg-darkMuted' : 'bg-primaryGold animate-pulse'}`}
                     />
                   ))}
                 </div>
-                <span className="text-xs font-bold text-deepNavy dark:text-white">{Math.min(history.length, 3)}/3</span>
               </div>
             </div>
 
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
-              className="w-10 h-10 rounded-full bg-white dark:bg-darkCard border border-softBorder dark:border-darkBorder flex items-center justify-center shadow-sm hover:scale-105 transition-transform text-steelGray dark:text-white"
+              className="w-10 h-10 rounded-none bg-white dark:bg-darkCard border border-softBorder dark:border-darkBorder flex items-center justify-center shadow-sm hover:scale-105 transition-transform text-steelGray dark:text-white"
             >
               {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
             </button>
 
-            <div className="flex items-center gap-2 bg-white/60 dark:bg-darkCard backdrop-blur-sm px-3 py-2 rounded-full border border-softBorder dark:border-darkBorder shadow-sm">
+            <div className="flex items-center gap-2 bg-white/60 dark:bg-darkCard backdrop-blur-sm px-3 py-2 rounded-none border border-softBorder dark:border-darkBorder shadow-sm">
               <span className="text-xs font-bold text-deepNavy dark:text-darkText hidden md:inline">gen z</span>
               <button
                 onClick={() => setIsGenZMode(!isGenZMode)}
-                className={`w-9 h-5 rounded-full transition-colors relative ${isGenZMode ? 'bg-primaryGold' : 'bg-softBorder dark:bg-darkBorder'}`}
+                className={`w-9 h-5 rounded-none transition-colors relative ${isGenZMode ? 'bg-primaryGold' : 'bg-softBorder dark:bg-darkBorder'}`}
               >
-                <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-md transition-transform duration-300 ${isGenZMode ? 'left-[18px]' : 'left-0.5'}`} />
+                <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-none shadow-md transition-transform duration-300 ${isGenZMode ? 'left-[18px]' : 'left-0.5'}`} />
               </button>
             </div>
           </div>
@@ -561,7 +621,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {activeTab === 'home' && (
           <div className="w-full max-w-5xl mx-auto animate-slide-up pb-10">
             <div className="mb-12 hidden lg:block">
-              <h1 className="text-4xl font-extrabold mb-3 tracking-tight text-deepNavy dark:text-white">what's up, {user}?</h1>
+              <h1 className="text-4xl font-extrabold mb-3 tracking-tight text-deepNavy dark:text-white">what's up, {user?.user_metadata?.full_name?.split(' ')[0] || 'Friend'}?</h1>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
@@ -574,9 +634,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <button
                   key={item.id}
                   onClick={() => setActiveModal(item.id as any)}
-                  className="bg-white dark:bg-darkCard rounded-[20px] p-6 border border-softBorder dark:border-darkBorder hover:border-primaryGold dark:hover:border-primaryGold hover:shadow-hover transition-all group flex flex-col items-start gap-4"
+                  className="bg-white dark:bg-darkCard rounded-none p-6 border border-softBorder dark:border-darkBorder hover:border-primaryGold dark:hover:border-primaryGold hover:shadow-hover transition-all group flex flex-col items-start gap-4"
                 >
-                  <div className="w-10 h-10 bg-iceGray dark:bg-darkBorder rounded-full flex items-center justify-center text-deepNavy dark:text-white group-hover:bg-primaryGold group-hover:text-white transition-colors">
+                  <div className="w-10 h-10 bg-iceGray dark:bg-darkBorder rounded-none flex items-center justify-center text-deepNavy dark:text-white group-hover:bg-primaryGold group-hover:text-white transition-colors">
                     <item.icon className="w-5 h-5 stroke-[1.5]" />
                   </div>
                   <div className="text-left">
@@ -596,13 +656,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   {history.slice(0, 5).map((set) => (
                     <div
                       key={set.id}
-                      className="w-full bg-white dark:bg-darkCard p-5 rounded-[20px] border border-softBorder dark:border-darkBorder hover:border-primaryGold dark:hover:border-white/20 transition-all flex items-center justify-between group shadow-sm hover:shadow-md"
+                      className="w-full bg-white dark:bg-darkCard p-5 rounded-none border border-softBorder dark:border-darkBorder hover:border-primaryGold dark:hover:border-white/20 transition-all flex items-center justify-between group shadow-sm hover:shadow-md"
                     >
                       <button
                         onClick={() => onSelectHistory(set)}
                         className="flex items-center gap-4 flex-1"
                       >
-                        <div className="w-10 h-10 rounded-full bg-iceGray dark:bg-darkBorder flex items-center justify-center text-deepNavy dark:text-white group-hover:bg-primaryGold group-hover:text-white transition-colors">
+                        <div className="w-10 h-10 rounded-none bg-iceGray dark:bg-darkBorder flex items-center justify-center text-deepNavy dark:text-white group-hover:bg-primaryGold group-hover:text-white transition-colors">
                           {set.type === 'audio' ? <Mic className="w-4 h-4" /> :
                             set.type === 'youtube' ? <Youtube className="w-4 h-4" /> :
                               set.type === 'pdf' ? <Upload className="w-4 h-4" /> :
@@ -617,7 +677,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         {onDeleteStudySet && (
                           <button
                             onClick={(e) => { e.stopPropagation(); setStudySetToDelete(set.id); setActiveModal('confirmDelete'); }}
-                            className="p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/10 text-steelGray hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                            className="p-2 rounded-none hover:bg-red-50 dark:hover:bg-red-900/10 text-steelGray hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -628,7 +688,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12 bg-white dark:bg-darkCard rounded-[24px] border border-softBorder dark:border-darkBorder border-dashed">
+                <div className="text-center py-12 bg-white dark:bg-darkCard rounded-none border border-softBorder dark:border-darkBorder border-dashed">
                   <p className="text-steelGray dark:text-darkMuted text-sm">No study sessions yet. Create your first one above!</p>
                 </div>
               )}
@@ -643,7 +703,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <h1 className="text-4xl font-extrabold mb-3 tracking-tight text-deepNavy dark:text-white">your insights</h1>
                 <p className="text-steelGray dark:text-darkMuted font-medium">track your learning progress</p>
               </div>
-              <div className="flex items-center gap-2 bg-white dark:bg-darkCard px-4 py-2 rounded-full border border-softBorder dark:border-darkBorder shadow-sm">
+              <div className="flex items-center gap-2 bg-white dark:bg-darkCard px-4 py-2 rounded-none border border-softBorder dark:border-darkBorder shadow-sm">
                 <Calendar className="w-4 h-4 text-primaryGold" />
                 <span className="text-sm font-bold text-deepNavy dark:text-white">{getWeekRange()}</span>
               </div>
@@ -655,9 +715,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <StatsCard history={history} />
                 </div>
 
-                <div className="bg-white dark:bg-darkCard rounded-[32px] p-8 border border-softBorder dark:border-darkBorder shadow-soft">
+                <div className="bg-white dark:bg-darkCard rounded-none p-8 border border-softBorder dark:border-darkBorder shadow-soft">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-full bg-iceGray dark:bg-darkBorder flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-none bg-iceGray dark:bg-darkBorder flex items-center justify-center">
                       <BarChart2 className="w-5 h-5 text-deepNavy dark:text-white" />
                     </div>
                     <div>
@@ -669,7 +729,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </div>
               </div>
             ) : (
-              <div className="text-center py-20 bg-white dark:bg-darkCard rounded-[32px] border border-softBorder dark:border-darkBorder">
+              <div className="text-center py-20 bg-white dark:bg-darkCard rounded-none border border-softBorder dark:border-darkBorder">
                 <BarChart2 className="w-16 h-16 text-softBorder dark:text-darkBorder mx-auto mb-4" />
                 <h3 className="text-xl font-bold text-deepNavy dark:text-white mb-2">No data yet</h3>
                 <p className="text-steelGray dark:text-darkMuted">Create your first study set to see insights!</p>
@@ -680,14 +740,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {activeTab === 'settings' && (
           <div className="max-w-3xl mx-auto animate-slide-up mt-6">
-            <div className="bg-white dark:bg-darkCard rounded-[40px] p-8 md:p-12 border border-softBorder dark:border-darkBorder shadow-soft">
+            <div className="bg-white dark:bg-darkCard rounded-none p-8 md:p-12 border border-softBorder dark:border-darkBorder shadow-soft">
 
               <div className="flex items-center gap-6 mb-12">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primaryGold to-deepNavy p-0.5">
-                  <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=${user}`} alt="avatar" className="w-full h-full rounded-full bg-white" />
+                <div className="w-8 h-8 rounded-none overflow-hidden border border-softBorder dark:border-darkBorder">
+                  <div className="w-full h-full bg-primaryGold flex items-center justify-center text-white font-bold text-xs">
+                    {user?.email?.[0]?.toUpperCase() || 'S'}
+                  </div>
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-deepNavy dark:text-white">{user || 'Guest User'}</h2>
+                  <h2 className="text-xl font-bold text-deepNavy dark:text-white">{user?.user_metadata?.full_name || 'Guest User'}</h2>
                   <p className="text-sm text-steelGray dark:text-darkMuted">Free Plan • {history.length} study sets</p>
                 </div>
               </div>
@@ -727,7 +789,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
               <div className="mb-12">
                 <h3 className="text-lg font-bold text-deepNavy dark:text-white mb-6">Your stats</h3>
-                <div className="bg-iceGray dark:bg-darkBg rounded-[24px] p-6">
+                <div className="bg-iceGray dark:bg-darkBg rounded-none p-6">
                   <div className="grid grid-cols-3 gap-4 text-center">
                     <div>
                       <p className="text-2xl font-extrabold text-deepNavy dark:text-white">{history.length}</p>
@@ -755,7 +817,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <button
                     onClick={() => setActiveModal('confirmReset')}
                     disabled={history.length === 0}
-                    className="w-full text-left px-6 py-4 rounded-xl border border-softBorder dark:border-darkBorder font-medium text-deepNavy dark:text-white text-sm hover:bg-iceGray dark:hover:bg-darkBorder/50 transition-colors flex justify-between items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full text-left px-6 py-4 rounded-none border border-softBorder dark:border-darkBorder font-medium text-deepNavy dark:text-white text-sm hover:bg-iceGray dark:hover:bg-darkBorder/50 transition-colors flex justify-between items-center disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Clear all study history ({history.length} sets)
                     <Info className="w-4 h-4 text-steelGray" />
@@ -763,7 +825,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
                   <button
                     onClick={() => setActiveModal('confirmDeleteAccount')}
-                    className="w-full text-left px-6 py-4 rounded-xl bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 font-bold text-sm hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors flex justify-between items-center"
+                    className="w-full text-left px-6 py-4 rounded-none bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 font-bold text-sm hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors flex justify-between items-center"
                   >
                     Delete account
                     <Trash2 className="w-4 h-4" />
@@ -782,13 +844,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
               {history.map((set) => (
                 <div
                   key={set.id}
-                  className="w-full bg-white dark:bg-darkCard p-6 rounded-[24px] border border-softBorder dark:border-darkBorder hover:border-primaryGold dark:hover:border-white/20 transition-all flex items-center justify-between group"
+                  className="w-full bg-white dark:bg-darkCard p-6 rounded-none border border-softBorder dark:border-darkBorder hover:border-primaryGold dark:hover:border-white/20 transition-all flex items-center justify-between group"
                 >
                   <button
                     onClick={() => onSelectHistory(set)}
                     className="flex items-center gap-4 flex-1 text-left"
                   >
-                    <div className="w-10 h-10 rounded-full bg-iceGray dark:bg-darkBorder flex items-center justify-center text-deepNavy dark:text-white">
+                    <div className="w-10 h-10 rounded-none bg-iceGray dark:bg-darkBorder flex items-center justify-center text-deepNavy dark:text-white">
                       {set.type === 'audio' ? <Mic className="w-5 h-5" /> :
                         set.type === 'youtube' ? <Youtube className="w-5 h-5" /> :
                           set.type === 'pdf' ? <Upload className="w-5 h-5" /> :
@@ -804,7 +866,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   {onDeleteStudySet && (
                     <button
                       onClick={(e) => { e.stopPropagation(); setStudySetToDelete(set.id); setActiveModal('confirmDelete'); }}
-                      className="p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/10 text-steelGray hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                      className="p-2 rounded-none hover:bg-red-50 dark:hover:bg-red-900/10 text-steelGray hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
@@ -812,7 +874,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </div>
               ))}
               {history.length === 0 && (
-                <div className="text-center py-12 bg-white dark:bg-darkCard rounded-[24px] border border-softBorder dark:border-darkBorder border-dashed">
+                <div className="text-center py-12 bg-white dark:bg-darkCard rounded-none border border-softBorder dark:border-darkBorder border-dashed">
                   <p className="text-steelGray dark:text-darkMuted">No study sets yet. Create your first one!</p>
                 </div>
               )}
@@ -827,8 +889,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {(activeModal === 'text' || activeModal === 'link') && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 glass-backdrop animate-fade-in" onClick={closeModal} />
-          <div className="bg-white dark:bg-darkCard w-full max-w-2xl rounded-[32px] shadow-modal border border-softBorder dark:border-darkBorder p-8 relative animate-scale-in z-10">
-            <button onClick={closeModal} className="absolute top-6 right-6 p-2 rounded-full hover:bg-iceGray dark:hover:bg-darkBorder transition-colors">
+          <div className="bg-white dark:bg-darkCard w-full max-w-2xl rounded-none shadow-modal border border-softBorder dark:border-darkBorder p-8 relative animate-scale-in z-10">
+            <button onClick={closeModal} className="absolute top-6 right-6 p-2 rounded-none hover:bg-iceGray dark:hover:bg-darkBorder transition-colors">
               <X className="w-6 h-6 text-steelGray dark:text-darkMuted" />
             </button>
 
@@ -837,7 +899,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             <textarea
               autoFocus
-              className="w-full h-48 bg-iceGray dark:bg-darkBg rounded-2xl p-6 resize-none outline-none focus:ring-2 focus:ring-primaryGold/50 text-base leading-relaxed mb-6 dark:text-white placeholder:text-steelGray"
+              className="w-full h-48 bg-iceGray dark:bg-darkBg rounded-none p-6 resize-none outline-none focus:ring-2 focus:ring-primaryGold/50 text-base leading-relaxed mb-6 dark:text-white placeholder:text-steelGray"
               placeholder={activeModal === 'link' ? "https://youtube.com/watch?v=..." : "Paste your content here..."}
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
@@ -846,7 +908,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <button
               onClick={handleTextSubmit}
               disabled={!textInput.trim() || isProcessing}
-              className="w-full py-4 bg-primaryGold text-white rounded-full font-bold hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-yellow-200/50"
+              className="w-full py-4 bg-primaryGold text-white rounded-none font-bold hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-yellow-200/50"
             >
               Analyze
             </button>
@@ -858,8 +920,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {activeModal === 'upload' && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 glass-backdrop animate-fade-in" onClick={closeModal} />
-          <div className="bg-white dark:bg-darkCard w-full max-w-md rounded-[40px] shadow-modal border border-softBorder dark:border-darkBorder p-12 relative animate-scale-in z-10 text-center">
-            <button onClick={closeModal} className="absolute top-6 right-6 p-2 rounded-full hover:bg-iceGray dark:hover:bg-darkBorder transition-colors">
+          <div className="bg-white dark:bg-darkCard w-full max-w-md rounded-none shadow-modal border border-softBorder dark:border-darkBorder p-12 relative animate-scale-in z-10 text-center">
+            <button onClick={closeModal} className="absolute top-6 right-6 p-2 rounded-none hover:bg-iceGray dark:hover:bg-darkBorder transition-colors">
               <X className="w-6 h-6 text-steelGray dark:text-darkMuted" />
             </button>
 
@@ -875,9 +937,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="w-full h-40 border-2 border-dashed border-softBorder dark:border-darkBorder rounded-[32px] flex flex-col items-center justify-center gap-4 hover:border-primaryGold hover:bg-primaryGold/5 dark:hover:bg-darkBorder/50 transition-colors group"
+              className="w-full h-40 border-2 border-dashed border-softBorder dark:border-darkBorder rounded-none flex flex-col items-center justify-center gap-4 hover:border-primaryGold hover:bg-primaryGold/5 dark:hover:bg-darkBorder/50 transition-colors group"
             >
-              <div className="w-12 h-12 bg-iceGray dark:bg-darkBorder rounded-full flex items-center justify-center text-steelGray dark:text-white group-hover:scale-110 transition-transform">
+              <div className="w-12 h-12 bg-iceGray dark:bg-darkBorder rounded-none flex items-center justify-center text-steelGray dark:text-white group-hover:scale-110 transition-transform">
                 <Upload className="w-6 h-6" />
               </div>
               <p className="text-steelGray dark:text-darkMuted font-medium">Tap to select file</p>
@@ -891,14 +953,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {activeModal === 'voice' && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 glass-backdrop animate-fade-in" onClick={closeModal} />
-          <div className="bg-white dark:bg-darkCard w-full max-w-md rounded-[40px] shadow-modal border border-softBorder dark:border-darkBorder p-12 relative animate-scale-in z-10 text-center">
-            <button onClick={closeModal} className="absolute top-6 right-6 p-2 rounded-full hover:bg-iceGray dark:hover:bg-darkBorder transition-colors">
+          <div className="bg-white dark:bg-darkCard w-full max-w-md rounded-none shadow-modal border border-softBorder dark:border-darkBorder p-12 relative animate-scale-in z-10 text-center">
+            <button onClick={closeModal} className="absolute top-6 right-6 p-2 rounded-none hover:bg-iceGray dark:hover:bg-darkBorder transition-colors">
               <X className="w-6 h-6 text-steelGray dark:text-darkMuted" />
             </button>
 
             <h2 className="text-2xl font-bold mb-8 dark:text-white">Recording Session</h2>
 
-            <div className={`w-32 h-32 mx-auto rounded-full flex items-center justify-center mb-10 transition-all duration-300 ${isRecording ? 'bg-red-50 text-red-500 scale-110 shadow-[0_0_30px_rgba(239,68,68,0.3)]' : 'bg-primaryGold text-white shadow-lg shadow-yellow-200/50'}`}>
+            <div className={`w-32 h-32 mx-auto rounded-none flex items-center justify-center mb-10 transition-all duration-300 ${isRecording ? 'bg-red-50 text-red-500 scale-110 shadow-[0_0_30px_rgba(239,68,68,0.3)]' : 'bg-primaryGold text-white shadow-lg shadow-yellow-200/50'}`}>
               <Mic className={`w-12 h-12 ${isRecording ? 'animate-pulse' : ''}`} />
             </div>
 
@@ -907,7 +969,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <p className="text-steelGray dark:text-darkMuted mb-6">Tap the button below to start.</p>
                 <button
                   onClick={startRecording}
-                  className="w-full py-4 bg-deepNavy dark:bg-white text-white dark:text-deepNavy rounded-full font-bold hover:bg-opacity-90 transition-all shadow-lg"
+                  className="w-full py-4 bg-deepNavy dark:bg-white text-white dark:text-deepNavy rounded-none font-bold hover:bg-opacity-90 transition-all shadow-lg"
                 >
                   Start Recording
                 </button>
@@ -917,7 +979,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <p className="text-red-500 font-medium mb-6 animate-pulse">Listening...</p>
                 <button
                   onClick={stopRecording}
-                  className="w-full py-4 bg-white dark:bg-darkBg border-2 border-red-500 text-red-500 rounded-full font-bold hover:bg-red-50 dark:hover:bg-red-900/10 transition-all"
+                  className="w-full py-4 bg-white dark:bg-darkBg border-2 border-red-500 text-red-500 rounded-none font-bold hover:bg-red-50 dark:hover:bg-red-900/10 transition-all"
                 >
                   Stop & Process
                 </button>
@@ -931,16 +993,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {activeModal === 'feedback' && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 glass-backdrop animate-fade-in" onClick={() => !feedbackSubmitted && setActiveModal(null)} />
-          <div className="bg-white dark:bg-darkCard w-full max-w-md rounded-[32px] shadow-modal border border-softBorder dark:border-darkBorder p-8 relative animate-scale-in z-10 text-center">
+          <div className="bg-white dark:bg-darkCard w-full max-w-md rounded-none shadow-modal border border-softBorder dark:border-darkBorder p-8 relative animate-scale-in z-10 text-center">
             {!feedbackSubmitted && (
-              <button onClick={() => setActiveModal(null)} className="absolute top-6 right-6 p-2 rounded-full hover:bg-iceGray dark:hover:bg-darkBorder transition-colors">
+              <button onClick={() => setActiveModal(null)} className="absolute top-6 right-6 p-2 rounded-none hover:bg-iceGray dark:hover:bg-darkBorder transition-colors">
                 <X className="w-6 h-6 text-steelGray dark:text-darkMuted" />
               </button>
             )}
 
             {feedbackSubmitted ? (
               <div className="py-8 animate-scale-in">
-                <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-none flex items-center justify-center mx-auto mb-4">
                   <CheckCircle2 className="w-8 h-8 text-green-500" />
                 </div>
                 <h2 className="text-2xl font-bold text-deepNavy dark:text-white mb-2">Thank you!</h2>
@@ -966,7 +1028,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </div>
 
                 <textarea
-                  className="w-full h-32 bg-iceGray dark:bg-darkBg rounded-2xl p-4 resize-none outline-none focus:ring-2 focus:ring-primaryGold/50 text-sm mb-6 dark:text-white placeholder:text-steelGray"
+                  className="w-full h-32 bg-iceGray dark:bg-darkBg rounded-none p-4 resize-none outline-none focus:ring-2 focus:ring-primaryGold/50 text-sm mb-6 dark:text-white placeholder:text-steelGray"
                   placeholder="Tell us what you think..."
                   value={feedbackText}
                   onChange={(e) => setFeedbackText(e.target.value)}
@@ -975,7 +1037,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <button
                   onClick={handleFeedbackSubmit}
                   disabled={feedbackRating === 0}
-                  className="w-full py-4 bg-primaryGold text-white rounded-full font-bold hover:opacity-90 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-4 bg-primaryGold text-white rounded-none font-bold hover:opacity-90 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Send Feedback
                 </button>
@@ -989,8 +1051,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {activeModal === 'confirmDelete' && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 glass-backdrop animate-fade-in" onClick={closeModal} />
-          <div className="bg-white dark:bg-darkCard w-full max-w-sm rounded-[32px] shadow-modal border border-softBorder dark:border-darkBorder p-8 relative animate-scale-in z-10 text-center">
-            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="bg-white dark:bg-darkCard w-full max-w-sm rounded-none shadow-modal border border-softBorder dark:border-darkBorder p-8 relative animate-scale-in z-10 text-center">
+            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-none flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-8 h-8 text-red-500" />
             </div>
             <h2 className="text-xl font-bold mb-2 dark:text-white">Delete Study Set?</h2>
@@ -999,13 +1061,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex gap-3">
               <button
                 onClick={closeModal}
-                className="flex-1 py-3 border border-softBorder dark:border-darkBorder rounded-full font-bold text-deepNavy dark:text-white hover:bg-iceGray dark:hover:bg-darkBorder transition-colors"
+                className="flex-1 py-3 border border-softBorder dark:border-darkBorder rounded-none font-bold text-deepNavy dark:text-white hover:bg-iceGray dark:hover:bg-darkBorder transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteStudySet}
-                className="flex-1 py-3 bg-red-500 text-white rounded-full font-bold hover:bg-red-600 transition-colors"
+                className="flex-1 py-3 bg-red-500 text-white rounded-none font-bold hover:bg-red-600 transition-colors"
               >
                 Delete
               </button>
@@ -1018,8 +1080,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {activeModal === 'confirmReset' && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 glass-backdrop animate-fade-in" onClick={closeModal} />
-          <div className="bg-white dark:bg-darkCard w-full max-w-sm rounded-[32px] shadow-modal border border-softBorder dark:border-darkBorder p-8 relative animate-scale-in z-10 text-center">
-            <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="bg-white dark:bg-darkCard w-full max-w-sm rounded-none shadow-modal border border-softBorder dark:border-darkBorder p-8 relative animate-scale-in z-10 text-center">
+            <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900/20 rounded-none flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-8 h-8 text-orange-500" />
             </div>
             <h2 className="text-xl font-bold mb-2 dark:text-white">Clear All History?</h2>
@@ -1028,13 +1090,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex gap-3">
               <button
                 onClick={closeModal}
-                className="flex-1 py-3 border border-softBorder dark:border-darkBorder rounded-full font-bold text-deepNavy dark:text-white hover:bg-iceGray dark:hover:bg-darkBorder transition-colors"
+                className="flex-1 py-3 border border-softBorder dark:border-darkBorder rounded-none font-bold text-deepNavy dark:text-white hover:bg-iceGray dark:hover:bg-darkBorder transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleResetHistory}
-                className="flex-1 py-3 bg-orange-500 text-white rounded-full font-bold hover:bg-orange-600 transition-colors"
+                className="flex-1 py-3 bg-orange-500 text-white rounded-none font-bold hover:bg-orange-600 transition-colors"
               >
                 Clear All
               </button>
@@ -1047,8 +1109,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {activeModal === 'confirmDeleteAccount' && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 glass-backdrop animate-fade-in" onClick={closeModal} />
-          <div className="bg-white dark:bg-darkCard w-full max-w-sm rounded-[32px] shadow-modal border border-softBorder dark:border-darkBorder p-8 relative animate-scale-in z-10 text-center">
-            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="bg-white dark:bg-darkCard w-full max-w-sm rounded-none shadow-modal border border-softBorder dark:border-darkBorder p-8 relative animate-scale-in z-10 text-center">
+            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-none flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-8 h-8 text-red-500" />
             </div>
             <h2 className="text-xl font-bold mb-2 dark:text-white">Delete Account?</h2>
@@ -1057,13 +1119,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex gap-3">
               <button
                 onClick={closeModal}
-                className="flex-1 py-3 border border-softBorder dark:border-darkBorder rounded-full font-bold text-deepNavy dark:text-white hover:bg-iceGray dark:hover:bg-darkBorder transition-colors"
+                className="flex-1 py-3 border border-softBorder dark:border-darkBorder rounded-none font-bold text-deepNavy dark:text-white hover:bg-iceGray dark:hover:bg-darkBorder transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteAccount}
-                className="flex-1 py-3 bg-red-500 text-white rounded-full font-bold hover:bg-red-600 transition-colors"
+                className="flex-1 py-3 bg-red-500 text-white rounded-none font-bold hover:bg-red-600 transition-colors"
               >
                 Delete
               </button>
@@ -1074,26 +1136,33 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* Upgrade Modal */}
       {activeModal === 'upgrade' && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-4">
           <div className="absolute inset-0 glass-backdrop animate-fade-in" onClick={closeModal} />
-          <div className="bg-iceGray dark:bg-darkBg w-full max-w-3xl rounded-[32px] shadow-modal relative animate-scale-in z-10 overflow-hidden">
+          <div className="bg-iceGray dark:bg-darkBg w-full h-full md:h-auto md:max-h-[90vh] max-w-3xl rounded-none shadow-modal relative animate-scale-in z-10 overflow-y-auto">
             <button onClick={closeModal} className="absolute top-6 right-6 text-steelGray hover:text-deepNavy dark:hover:text-white z-10">
               <X className="w-6 h-6" />
             </button>
 
             {/* Yearly/Monthly Toggle */}
-            <div className="flex justify-center pt-8 pb-6">
-              <div className="inline-flex bg-white dark:bg-darkCard rounded-full p-1.5 border border-softBorder dark:border-darkBorder shadow-sm">
+            <div className="flex flex-col items-center pt-8 pb-6 gap-6">
+              {hasReachedLimit && (
+                <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-none border border-red-100 dark:border-red-900/30 animate-pulse">
+                  <Lock className="w-4 h-4 text-red-500" />
+                  <span className="text-sm font-bold text-red-600 dark:text-red-400">You've reached your free limit of {FREE_TIER_LIMIT} notes</span>
+                </div>
+              )}
+
+              <div className="inline-flex bg-white dark:bg-darkCard rounded-none p-1.5 border border-softBorder dark:border-darkBorder shadow-sm">
                 <button
                   onClick={() => setIsYearlyPlan(true)}
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300 ${isYearlyPlan ? 'bg-deepNavy dark:bg-white text-white dark:text-deepNavy' : 'text-steelGray dark:text-darkMuted'}`}
+                  className={`flex items-center gap-2 px-6 py-2.5 rounded-none font-bold text-sm transition-all duration-300 ${isYearlyPlan ? 'bg-deepNavy dark:bg-white text-white dark:text-deepNavy' : 'text-steelGray dark:text-darkMuted'}`}
                 >
                   Yearly
-                  <span className={`bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-bold transition-opacity duration-300 ${isYearlyPlan ? 'opacity-100' : 'opacity-50'}`}>Save 60%</span>
+                  <span className={`bg-green-500 text-white text-xs px-2 py-0.5 rounded-none font-bold transition-opacity duration-300 ${isYearlyPlan ? 'opacity-100' : 'opacity-50'}`}>Save 60%</span>
                 </button>
                 <button
                   onClick={() => setIsYearlyPlan(false)}
-                  className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300 ${!isYearlyPlan ? 'bg-deepNavy dark:bg-white text-white dark:text-deepNavy' : 'text-steelGray dark:text-darkMuted'}`}
+                  className={`px-6 py-2.5 rounded-none font-bold text-sm transition-all duration-300 ${!isYearlyPlan ? 'bg-deepNavy dark:bg-white text-white dark:text-deepNavy' : 'text-steelGray dark:text-darkMuted'}`}
                 >
                   Monthly
                 </button>
@@ -1101,12 +1170,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             {/* Main Content */}
-            <div className="bg-white dark:bg-darkCard mx-6 mb-6 rounded-[24px] border border-softBorder dark:border-darkBorder p-8">
+            <div className="bg-white dark:bg-darkCard mx-4 md:mx-6 mb-6 rounded-none border border-softBorder dark:border-darkBorder p-5 md:p-8">
               <div className="flex flex-col md:flex-row gap-8">
                 {/* Left Side */}
                 <div className="flex-1">
                   <div className="flex items-center gap-4 mb-6">
-                    <div className="w-16 h-16 bg-deepNavy dark:bg-white rounded-2xl flex items-center justify-center">
+                    <div className="w-16 h-16 bg-deepNavy dark:bg-white rounded-none flex items-center justify-center">
                       <Mic className="w-8 h-8 text-white dark:text-deepNavy" />
                     </div>
                     <div>
@@ -1139,9 +1208,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     )}
                   </div>
 
-                  <button className="w-full flex items-center justify-center gap-3 bg-deepNavy dark:bg-white text-white dark:text-deepNavy font-bold py-4 px-8 rounded-2xl hover:opacity-90 transition-opacity">
-                    Upgrade plan
-                    <ArrowRight className="w-5 h-5" />
+                  <button
+                    onClick={handleUpgrade}
+                    disabled={isCheckingOut}
+                    className="w-full flex items-center justify-center gap-3 bg-deepNavy dark:bg-white text-white dark:text-deepNavy font-bold py-4 px-8 rounded-none hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isCheckingOut ? 'Processing...' : 'Upgrade plan'}
+                    {!isCheckingOut && <ArrowRight className="w-5 h-5" />}
                   </button>
                 </div>
 
@@ -1180,7 +1253,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             {/* Animated Circle */}
             <div className="relative w-32 h-32 mb-10">
-              <div className="absolute inset-0 rounded-full border-[6px] border-iceGray dark:border-darkBorder/50"></div>
+              <div className="absolute inset-0 rounded-none border-[6px] border-iceGray dark:border-darkBorder/50"></div>
               <svg className="absolute inset-0 transform -rotate-90 w-full h-full">
                 <circle
                   cx="64" cy="64" r="61"
@@ -1210,19 +1283,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </h3>
 
             {/* Step Progress List */}
-            <div className="w-full max-w-sm bg-iceGray/50 dark:bg-darkBorder/30 rounded-2xl p-4 mb-6">
+            <div className="w-full max-w-sm bg-iceGray/50 dark:bg-darkBorder/30 rounded-none p-4 mb-6">
               <div className="space-y-2">
                 {loadingSteps.slice(0, -1).map((step, index) => (
                   <div
                     key={index}
-                    className={`flex items-center gap-3 py-2 px-3 rounded-xl transition-all duration-300 ${index < loadingStep
+                    className={`flex items-center gap-3 py-2 px-3 rounded-none transition-all duration-300 ${index < loadingStep
                       ? 'text-green-600 dark:text-green-400'
                       : index === loadingStep
                         ? 'text-deepNavy dark:text-white bg-white dark:bg-darkCard shadow-sm'
                         : 'text-steelGray/50 dark:text-darkMuted/50'
                       }`}
                   >
-                    <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${index < loadingStep
+                    <div className={`w-5 h-5 rounded-none flex items-center justify-center flex-shrink-0 ${index < loadingStep
                       ? 'bg-green-500 text-white'
                       : index === loadingStep
                         ? 'bg-primaryGold text-white'
@@ -1231,7 +1304,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       {index < loadingStep ? (
                         <CheckCircle2 className="w-3 h-3" />
                       ) : index === loadingStep ? (
-                        <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                        <div className="w-2 h-2 bg-white rounded-none animate-pulse"></div>
                       ) : (
                         <span className="text-[10px] font-bold">{index + 1}</span>
                       )}
@@ -1243,7 +1316,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             {/* Fun Tip */}
-            <div className="bg-white dark:bg-darkCard p-5 rounded-2xl border border-softBorder dark:border-darkBorder shadow-sm max-w-sm">
+            <div className="bg-white dark:bg-darkCard p-5 rounded-none border border-softBorder dark:border-darkBorder shadow-sm max-w-sm">
               <p className="text-steelGray dark:text-darkMuted text-sm font-medium leading-relaxed">
                 💡 <span className="italic">"{currentTip}"</span>
               </p>

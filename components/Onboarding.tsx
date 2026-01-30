@@ -137,14 +137,14 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           {step > 0 && (
             <button 
               onClick={handleBack}
-              className="p-2 -ml-2 hover:bg-iceGray rounded-full transition-colors"
+              className="p-2 -ml-2 hover:bg-iceGray rounded-none transition-colors"
             >
               <ArrowLeft className="w-5 h-5 text-deepNavy" />
             </button>
           )}
-          <div className="flex-1 h-1.5 bg-iceGray rounded-full overflow-hidden">
+          <div className="flex-1 h-1.5 bg-iceGray rounded-none overflow-hidden">
             <div 
-              className="h-full bg-deepNavy rounded-full transition-all duration-500"
+              className="h-full bg-deepNavy rounded-none transition-all duration-500"
               style={{ width: `${((step + 1) / totalSteps) * 100}%` }}
             />
           </div>
@@ -158,7 +158,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           {/* Step 0: Welcome */}
           {step === 0 && (
             <div className="text-center animate-slide-up">
-              <div className="w-16 h-16 rounded-full bg-accentYellow mx-auto mb-10 shadow-lg shadow-yellow-200/50"></div>
+              <div className="w-16 h-16 rounded-none bg-accentYellow mx-auto mb-10 shadow-lg shadow-yellow-200/50"></div>
               
               <h2 className="text-2xl font-bold text-deepNavy mb-6">hi friend</h2>
               
@@ -180,7 +180,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           {/* Step 1: Name */}
           {step === 1 && (
             <div className="text-center animate-slide-up">
-              <div className="w-12 h-12 rounded-full bg-accentYellow mx-auto mb-8 flex items-center justify-center text-2xl">👋</div>
+              <div className="w-12 h-12 rounded-none bg-accentYellow mx-auto mb-8 flex items-center justify-center text-2xl">👋</div>
               <h2 className="text-3xl font-extrabold text-deepNavy mb-4">what should we call you?</h2>
               <p className="text-steelGray mb-10">let's make this personal</p>
               
@@ -207,7 +207,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   <button
                     key={option.id}
                     onClick={() => setData({ ...data, gender: option.id })}
-                    className={`p-6 rounded-[24px] border-2 transition-all duration-200 flex flex-col items-center gap-3 hover:scale-[1.02] ${
+                    className={`p-6 rounded-none border-2 transition-all duration-200 flex flex-col items-center gap-3 hover:scale-[1.02] ${
                       data.gender === option.id 
                         ? 'border-primaryGold bg-primaryGold/5' 
                         : 'border-softBorder hover:border-primaryGold/50'
@@ -234,7 +234,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   <button
                     key={option.id}
                     onClick={() => setData({ ...data, ageRange: option.id })}
-                    className={`p-5 rounded-[20px] border-2 transition-all duration-200 flex items-center justify-between hover:scale-[1.01] ${
+                    className={`p-5 rounded-none border-2 transition-all duration-200 flex items-center justify-between hover:scale-[1.01] ${
                       data.ageRange === option.id 
                         ? 'border-primaryGold bg-primaryGold/5' 
                         : 'border-softBorder hover:border-primaryGold/50'
@@ -244,7 +244,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                       {option.label}
                     </span>
                     {data.ageRange === option.id && (
-                      <div className="w-6 h-6 rounded-full bg-primaryGold flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-none bg-primaryGold flex items-center justify-center">
                         <Check className="w-4 h-4 text-white" />
                       </div>
                     )}
@@ -265,13 +265,13 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   <button
                     key={option.id}
                     onClick={() => setData({ ...data, referralSource: option.id })}
-                    className={`p-5 rounded-[20px] border-2 transition-all duration-200 flex items-center gap-4 hover:scale-[1.02] ${
+                    className={`p-5 rounded-none border-2 transition-all duration-200 flex items-center gap-4 hover:scale-[1.02] ${
                       data.referralSource === option.id 
                         ? 'border-primaryGold bg-primaryGold/5' 
                         : 'border-softBorder hover:border-primaryGold/50'
                     }`}
                   >
-                    <div className={`w-10 h-10 rounded-xl ${option.color} flex items-center justify-center text-white`}>
+                    <div className={`w-10 h-10 rounded-none ${option.color} flex items-center justify-center text-white`}>
                       <option.icon className="w-5 h-5" />
                     </div>
                     <span className={`font-bold text-sm ${data.referralSource === option.id ? 'text-primaryGold' : 'text-deepNavy'}`}>
@@ -296,13 +296,13 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                     <button
                       key={option.id}
                       onClick={() => toggleArrayItem('studyAreas', option.id)}
-                      className={`p-5 rounded-[20px] border-2 transition-all duration-200 flex items-center gap-4 hover:scale-[1.02] ${
+                      className={`p-5 rounded-none border-2 transition-all duration-200 flex items-center gap-4 hover:scale-[1.02] ${
                         isSelected 
                           ? 'border-primaryGold bg-primaryGold/5' 
                           : 'border-softBorder hover:border-primaryGold/50'
                       }`}
                     >
-                      <div className={`w-10 h-10 rounded-xl ${isSelected ? 'bg-primaryGold text-white' : 'bg-iceGray text-deepNavy'} flex items-center justify-center transition-colors`}>
+                      <div className={`w-10 h-10 rounded-none ${isSelected ? 'bg-primaryGold text-white' : 'bg-iceGray text-deepNavy'} flex items-center justify-center transition-colors`}>
                         <option.icon className="w-5 h-5" />
                       </div>
                       <span className={`font-bold text-sm text-left ${isSelected ? 'text-primaryGold' : 'text-deepNavy'}`}>
@@ -326,13 +326,13 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   <button
                     key={option.id}
                     onClick={() => setData({ ...data, goal: option.id })}
-                    className={`p-5 rounded-[20px] border-2 transition-all duration-200 flex items-center gap-4 hover:scale-[1.01] ${
+                    className={`p-5 rounded-none border-2 transition-all duration-200 flex items-center gap-4 hover:scale-[1.01] ${
                       data.goal === option.id 
                         ? 'border-primaryGold bg-primaryGold/5' 
                         : 'border-softBorder hover:border-primaryGold/50'
                     }`}
                   >
-                    <div className={`w-10 h-10 rounded-xl ${data.goal === option.id ? 'bg-primaryGold text-white' : 'bg-iceGray text-deepNavy'} flex items-center justify-center transition-colors`}>
+                    <div className={`w-10 h-10 rounded-none ${data.goal === option.id ? 'bg-primaryGold text-white' : 'bg-iceGray text-deepNavy'} flex items-center justify-center transition-colors`}>
                       <option.icon className="w-5 h-5" />
                     </div>
                     <span className={`font-bold ${data.goal === option.id ? 'text-primaryGold' : 'text-deepNavy'}`}>
@@ -357,13 +357,13 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                     <button
                       key={option.id}
                       onClick={() => toggleArrayItem('learningSources', option.id)}
-                      className={`p-5 rounded-[20px] border-2 transition-all duration-200 flex items-center gap-4 hover:scale-[1.02] ${
+                      className={`p-5 rounded-none border-2 transition-all duration-200 flex items-center gap-4 hover:scale-[1.02] ${
                         isSelected 
                           ? 'border-primaryGold bg-primaryGold/5' 
                           : 'border-softBorder hover:border-primaryGold/50'
                       }`}
                     >
-                      <div className={`w-10 h-10 rounded-xl ${isSelected ? 'bg-primaryGold text-white' : 'bg-iceGray text-deepNavy'} flex items-center justify-center transition-colors`}>
+                      <div className={`w-10 h-10 rounded-none ${isSelected ? 'bg-primaryGold text-white' : 'bg-iceGray text-deepNavy'} flex items-center justify-center transition-colors`}>
                         <option.icon className="w-5 h-5" />
                       </div>
                       <span className={`font-bold text-sm text-left ${isSelected ? 'text-primaryGold' : 'text-deepNavy'}`}>
@@ -380,26 +380,26 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           {step === 8 && (
             <div className="text-center animate-slide-up">
               <div className="w-24 h-24 mx-auto mb-8 relative">
-                <div className="absolute inset-0 bg-iceGray rounded-2xl rotate-6"></div>
-                <div className="absolute inset-0 bg-softBorder rounded-2xl -rotate-3"></div>
-                <div className="absolute inset-0 bg-primaryGold rounded-2xl flex items-center justify-center">
+                <div className="absolute inset-0 bg-iceGray rounded-none rotate-6"></div>
+                <div className="absolute inset-0 bg-softBorder rounded-none -rotate-3"></div>
+                <div className="absolute inset-0 bg-primaryGold rounded-none flex items-center justify-center">
                   <BookOpen className="w-10 h-10 text-white" />
                 </div>
               </div>
               
               <h2 className="text-3xl font-extrabold text-deepNavy mb-8">how is studymi different from ChatGPT?</h2>
               
-              <div className="text-left space-y-4 bg-iceGray/50 p-8 rounded-[24px]">
+              <div className="text-left space-y-4 bg-iceGray/50 p-8 rounded-none">
                 <div className="flex items-start gap-4">
-                  <div className="w-2 h-2 rounded-full bg-primaryGold mt-2 flex-shrink-0"></div>
+                  <div className="w-2 h-2 rounded-none bg-primaryGold mt-2 flex-shrink-0"></div>
                   <p className="text-deepNavy font-medium">Built specifically for <span className="font-bold">studying</span> and <span className="font-bold">long-term memory</span></p>
                 </div>
                 <div className="flex items-start gap-4">
-                  <div className="w-2 h-2 rounded-full bg-primaryGold mt-2 flex-shrink-0"></div>
+                  <div className="w-2 h-2 rounded-none bg-primaryGold mt-2 flex-shrink-0"></div>
                   <p className="text-deepNavy font-medium">Auto-generates <span className="font-bold">explanations, quizzes & flashcards</span></p>
                 </div>
                 <div className="flex items-start gap-4">
-                  <div className="w-2 h-2 rounded-full bg-primaryGold mt-2 flex-shrink-0"></div>
+                  <div className="w-2 h-2 rounded-none bg-primaryGold mt-2 flex-shrink-0"></div>
                   <p className="text-deepNavy font-medium">Tracks what you <span className="font-bold">forget</span> and reminds you <span className="font-bold">when to revise</span></p>
                 </div>
               </div>
@@ -409,7 +409,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           {/* Step 9: First Topic */}
           {step === 9 && (
             <div className="text-center animate-slide-up">
-              <div className="w-12 h-12 rounded-full bg-accentYellow mx-auto mb-8 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-none bg-accentYellow mx-auto mb-8 flex items-center justify-center">
                 <Lightbulb className="w-6 h-6 text-deepNavy" />
               </div>
               <h2 className="text-3xl font-extrabold text-deepNavy mb-4">what do you want to learn first?</h2>
@@ -433,9 +433,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               <div className="w-full h-32 mb-8 relative">
                 <div className="absolute inset-0 flex items-end justify-center gap-2 px-8">
                   {[20, 35, 50, 70, 95].map((height, i) => (
-                    <div key={i} className="flex-1 bg-iceGray rounded-t-lg relative overflow-hidden">
+                    <div key={i} className="flex-1 bg-iceGray rounded-none relative overflow-hidden">
                       <div 
-                        className="absolute bottom-0 left-0 right-0 bg-primaryGold rounded-t-lg transition-all duration-1000"
+                        className="absolute bottom-0 left-0 right-0 bg-primaryGold rounded-none transition-all duration-1000"
                         style={{ height: `${height}%`, transitionDelay: `${i * 100}ms` }}
                       ></div>
                     </div>
@@ -446,7 +446,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               
               <h2 className="text-2xl font-extrabold text-deepNavy mb-4">you're in good hands</h2>
               
-              <div className="bg-iceGray/50 p-6 rounded-[24px] mb-8">
+              <div className="bg-iceGray/50 p-6 rounded-none mb-8">
                 <p className="text-4xl font-extrabold text-primaryGold mb-2">3.4×</p>
                 <p className="text-deepNavy font-medium">
                   Students who used <span className="font-bold">spaced learning + smart quizzes</span> improved recall in just 4 weeks
@@ -458,16 +458,16 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               </p>
 
               {/* Gen Z Mode Toggle */}
-              <div className="bg-white border-2 border-softBorder rounded-[24px] p-6 flex items-center justify-between">
+              <div className="bg-white border-2 border-softBorder rounded-none p-6 flex items-center justify-between">
                 <div className="text-left">
                   <p className="font-bold text-deepNavy">Gen Z Mode</p>
                   <p className="text-sm text-steelGray">Chill vibes, simple explanations ✨</p>
                 </div>
                 <button 
                   onClick={() => setData({ ...data, genZMode: !data.genZMode })}
-                  className={`w-14 h-8 rounded-full transition-colors relative ${data.genZMode ? 'bg-primaryGold' : 'bg-softBorder'}`}
+                  className={`w-14 h-8 rounded-none transition-colors relative ${data.genZMode ? 'bg-primaryGold' : 'bg-softBorder'}`}
                 >
-                  <div className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 ${data.genZMode ? 'left-7' : 'left-1'}`} />
+                  <div className={`absolute top-1 w-6 h-6 bg-white rounded-none shadow-md transition-transform duration-300 ${data.genZMode ? 'left-7' : 'left-1'}`} />
                 </button>
               </div>
             </div>
@@ -481,7 +481,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         <button 
           onClick={handleNext}
           disabled={!canProceed()}
-          className="w-full bg-deepNavy text-white py-5 rounded-full font-bold text-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-xl shadow-deepNavy/20"
+          className="w-full bg-deepNavy text-white py-5 rounded-none font-bold text-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-xl shadow-deepNavy/20"
         >
           {step === 0 ? 'start' : step === 10 ? 'finish setup' : 'continue'}
           <ArrowRight className="w-5 h-5" />
