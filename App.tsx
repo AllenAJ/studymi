@@ -1,16 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { generateStudySet } from './services/geminiService';
-import { supabase, getProfile, upsertProfile, saveStudySet, getStudySets } from './services/supabase';
+import { supabase, getProfile, upsertProfile, saveStudySet, getStudySets, deleteStudySet, deleteAllStudySets, submitFeedback } from './services/supabase';
 import { StudySet, InputType } from './types';
 import { LandingPage } from './components/LandingPage';
 import { AuthPage } from './components/AuthPage';
 import { Dashboard } from './components/Dashboard';
 import { StudyView } from './components/StudyView';
 import { Onboarding, OnboardingData } from './components/Onboarding';
+import { LegalPage } from './components/LegalPage';
 import { User } from '@supabase/supabase-js';
 
+type ViewType = 'loading' | 'landing' | 'auth' | 'onboarding' | 'dashboard' | 'study' | 'privacy' | 'terms' | 'disclaimer';
+
 const App: React.FC = () => {
-  const [view, setView] = useState<'loading' | 'landing' | 'auth' | 'onboarding' | 'dashboard' | 'study'>('loading');
+  // Check URL for legal pages on initial load
+  const getInitialView = (): ViewType => {
+    const path = window.location.pathname;
+    if (path === '/privacy') return 'privacy';
+    if (path === '/terms') return 'terms';
+    if (path === '/disclaimer') return 'disclaimer';
+    return 'loading';
+  };
+
+  const [view, setView] = useState<ViewType>(getInitialView());
   const [user, setUser] = useState<User | null>(null);
   const [userName, setUserName] = useState('');
   const [userVibe, setUserVibe] = useState('focused');
@@ -18,14 +30,52 @@ const App: React.FC = () => {
   const [history, setHistory] = useState<StudySet[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Handle browser back/forward navigation and URL routing
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      if (path === '/privacy') setView('privacy');
+      else if (path === '/terms') setView('terms');
+      else if (path === '/disclaimer') setView('disclaimer');
+      else if (path === '/' || path === '') {
+        // Return to appropriate view based on auth state
+        if (user) setView('dashboard');
+        else setView('landing');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [user]);
+
+  // Navigate to legal page and update URL
+  const navigateToLegal = (type: 'privacy' | 'terms' | 'disclaimer') => {
+    window.history.pushState({}, '', `/${type}`);
+    setView(type);
+  };
+
+  // Navigate back from legal pages
+  const handleLegalBack = () => {
+    window.history.pushState({}, '', '/');
+    if (user) setView('dashboard');
+    else setView('landing');
+  };
+
   // Check auth state on mount
   useEffect(() => {
+    // Skip auth redirect if on legal pages
+    const isLegalPage = view === 'privacy' || view === 'terms' || view === 'disclaimer';
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
-        loadUserData(session.user.id);
-      } else {
+        // Only load user data and redirect if not on a legal page
+        if (!isLegalPage) {
+          loadUserData(session.user.id);
+        }
+      } else if (!isLegalPage) {
+        // Only redirect to landing if not on a legal page
         setView('landing');
       }
     });
@@ -49,11 +99,11 @@ const App: React.FC = () => {
   const loadUserData = async (userId: string) => {
     // Load profile
     const { data: profile } = await getProfile(userId);
-    
+
     if (profile?.name) {
       setUserName(profile.name);
       setUserVibe(profile.vibe || 'focused');
-      
+
       // Load study sets
       const { data: studySets } = await getStudySets(userId);
       if (studySets) {
@@ -70,7 +120,7 @@ const App: React.FC = () => {
         }));
         setHistory(mappedSets);
       }
-      
+
       setView('dashboard');
     } else {
       // New user, needs onboarding
@@ -79,14 +129,14 @@ const App: React.FC = () => {
   };
 
   const handleStart = () => setView('auth');
-  
+
   const handleAuthComplete = async (userId: string, email: string) => {
     // Check if user has completed onboarding
     const { data: profile } = await getProfile(userId);
     if (profile?.name) {
       setUserName(profile.name);
       setUserVibe(profile.vibe || 'focused');
-      
+
       // Load study sets
       const { data: studySets } = await getStudySets(userId);
       if (studySets) {
@@ -103,17 +153,17 @@ const App: React.FC = () => {
         }));
         setHistory(mappedSets);
       }
-      
+
       setView('dashboard');
     } else {
       setView('onboarding');
     }
   };
-  
+
   const handleOnboardingComplete = async (data: OnboardingData) => {
     setUserName(data.name);
     setUserVibe(data.genZMode ? 'chill' : 'focused');
-    
+
     // Save profile to Supabase
     if (user) {
       await upsertProfile({
@@ -130,7 +180,7 @@ const App: React.FC = () => {
         vibe: data.genZMode ? 'chill' : 'focused',
       });
     }
-    
+
     setView('dashboard');
   };
 
@@ -140,20 +190,36 @@ const App: React.FC = () => {
       const newSet = await generateStudySet(content, type, genZMode, mimeType);
       setCurrentSet(newSet);
       setHistory(prev => [newSet, ...prev]);
-      
-      // Save to Supabase
+
+      // Save to Supabase with timeout
       if (user) {
-        const { data: savedSet } = await saveStudySet(user.id, newSet);
-        if (savedSet) {
-          // Update the ID with the database ID
-          newSet.id = savedSet.id;
+        console.log('Saving to Supabase...', { userId: user.id, title: newSet.title });
+        try {
+          // Add 10 second timeout for save operation
+          const savePromise = saveStudySet(user.id, newSet);
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Save timeout')), 10000)
+          );
+
+          const result = await Promise.race([savePromise, timeoutPromise]) as any;
+
+          if (result?.error) {
+            console.error('Supabase save error:', result.error);
+          } else if (result?.data) {
+            console.log('Saved successfully:', result.data.id);
+            newSet.id = result.data.id;
+          }
+        } catch (saveError: any) {
+          console.error('Save failed:', saveError?.message || saveError);
+          // Continue anyway - don't block the user
         }
       }
-      
+
+      console.log('Setting view to study...');
       setView('study');
     } catch (error) {
-      console.error(error);
-      alert("Failed to generate study set. Please try again.");
+      console.error('Generation error:', error);
+      alert(`Failed to generate study set: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsProcessing(false);
     }
@@ -165,6 +231,38 @@ const App: React.FC = () => {
   };
 
   const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUserName('');
+    setCurrentSet(null);
+    setHistory([]);
+    setView('landing');
+  };
+
+  const handleDeleteStudySet = async (studySetId: string) => {
+    const { error } = await deleteStudySet(studySetId);
+    if (!error) {
+      setHistory(prev => prev.filter(set => set.id !== studySetId));
+    }
+  };
+
+  const handleSubmitFeedback = async (rating: number, text: string) => {
+    if (user) {
+      await submitFeedback(user.id, rating, text);
+    }
+  };
+
+  const handleResetHistory = async () => {
+    if (user) {
+      const { error } = await deleteAllStudySets(user.id);
+      if (!error) {
+        setHistory([]);
+      }
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    // In a real app, you'd want to call a server function to delete user data
+    // For now, we'll just sign them out
     await supabase.auth.signOut();
     setUserName('');
     setCurrentSet(null);
@@ -194,13 +292,17 @@ const App: React.FC = () => {
 
   if (view === 'dashboard') {
     return (
-      <Dashboard 
-        user={userName || 'Friend'} 
-        onProcess={handleProcess} 
-        isProcessing={isProcessing} 
-        onLogout={handleLogout} 
+      <Dashboard
+        user={userName || 'Friend'}
+        onProcess={handleProcess}
+        isProcessing={isProcessing}
+        onLogout={handleLogout}
         history={history}
         onSelectHistory={handleSelectHistory}
+        onDeleteStudySet={handleDeleteStudySet}
+        onSubmitFeedback={handleSubmitFeedback}
+        onResetHistory={handleResetHistory}
+        onDeleteAccount={handleDeleteAccount}
         initialGenZMode={userVibe === 'chill'}
       />
     );
@@ -208,6 +310,18 @@ const App: React.FC = () => {
 
   if (view === 'study' && currentSet) {
     return <StudyView studySet={currentSet} onBack={() => setView('dashboard')} />;
+  }
+
+  if (view === 'privacy') {
+    return <LegalPage type="privacy" onBack={handleLegalBack} />;
+  }
+
+  if (view === 'terms') {
+    return <LegalPage type="terms" onBack={handleLegalBack} />;
+  }
+
+  if (view === 'disclaimer') {
+    return <LegalPage type="disclaimer" onBack={handleLegalBack} />;
   }
 
   return <LandingPage onStart={handleStart} />;
