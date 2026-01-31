@@ -18,14 +18,23 @@ export default async function handler(req: any, res: any) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const apiKey = process.env.DODO_PAYMENTS_API_KEY;
+    const apiKey = process.env.DODO_PAYMENTS_API_KEY?.trim();
     if (!apiKey) {
-        return res.status(500).json({ error: 'Dodo Payments API key not configured' });
+        console.error('Configuration Error: DODO_PAYMENTS_API_KEY is missing');
+        return res.status(500).json({ error: 'Payment configuration error' });
     }
+
+    // Fix: Some test keys don't start with 'test_', so we default to test_mode
+    // unless the key explicitly starts with 'live_'.
+    const isLive = apiKey.startsWith('live_');
+    const environment = isLive ? 'live_mode' : 'test_mode';
+
+    // Using console.error to ensure it shows up in Vercel Error Logs
+    console.error(`[DEBUG] Initializing Dodo in ${environment} (Key: ...${apiKey.slice(-4)})`);
 
     const client = new DodoPayments({
         bearerToken: apiKey,
-        environment: apiKey.startsWith('test_') ? 'test_mode' : 'live_mode',
+        environment: environment,
     });
 
     const { plan, returnUrl, customerEmail, customerName, userId } = req.body;
@@ -40,7 +49,8 @@ export default async function handler(req: any, res: any) {
     }
 
     if (!productId) {
-        return res.status(500).json({ error: 'Product IDs not configured' });
+        console.error('Configuration Error: Product IDs are missing');
+        return res.status(500).json({ error: 'Product configuration error' });
     }
 
     try {
@@ -62,7 +72,9 @@ export default async function handler(req: any, res: any) {
         return res.status(200).json({ checkout_url: session.checkout_url });
     } catch (error: any) {
         console.error('Dodo Payments checkout error:', error);
-        return res.status(500).json({
+        // Forward the specific status code if available (e.g. 401, 422)
+        const statusCode = error.statusCode || error.status || 500;
+        return res.status(statusCode).json({
             error: error.message || 'Failed to create checkout session'
         });
     }

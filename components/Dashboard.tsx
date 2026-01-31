@@ -18,6 +18,7 @@ interface DashboardProps {
   onDeleteAccount?: () => void;
   initialGenZMode?: boolean;
   isPremium?: boolean;
+  subscriptionId?: string | null;
 }
 
 // Activity Bar Chart Component - Now uses real data
@@ -149,7 +150,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onResetHistory,
   onDeleteAccount,
   initialGenZMode = false,
-  isPremium = false
+  isPremium = false,
+  subscriptionId
 }) => {
   const [activeTab, setActiveTab] = useState<'home' | 'insights' | 'settings' | 'history'>('home');
   const [activeModal, setActiveModal] = useState<'voice' | 'text' | 'upload' | 'link' | 'feedback' | 'confirmDelete' | 'confirmReset' | 'confirmDeleteAccount' | 'upgrade' | null>(null);
@@ -507,13 +509,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         <div className="flex flex-col gap-2 w-full px-4 mb-8">
           {/* Upgrade Button */}
-          <button
-            onClick={() => { setActiveModal('upgrade'); setIsSidebarOpen(false); }}
-            className="flex items-center gap-3 p-3.5 rounded-none border border-softBorder dark:border-darkBorder text-deepNavy dark:text-white hover:bg-iceGray dark:hover:bg-darkBorder/50 transition-colors"
-          >
-            <Crown className="w-5 h-5 text-primaryGold" />
-            <span className="lg:hidden text-sm font-medium">Upgrade plan</span>
-          </button>
+          {/* Upgrade Button */}
+          {!isPremium && (
+            <button
+              onClick={() => { setActiveModal('upgrade'); setIsSidebarOpen(false); }}
+              className="flex items-center gap-3 p-3.5 rounded-none border border-softBorder dark:border-darkBorder text-deepNavy dark:text-white hover:bg-iceGray dark:hover:bg-darkBorder/50 transition-colors"
+            >
+              <Crown className="w-5 h-5 text-primaryGold" />
+              <span className="lg:hidden text-sm font-medium">Upgrade plan</span>
+            </button>
+          )}
 
           <button
             onClick={() => { setActiveModal('feedback'); setIsSidebarOpen(false); }}
@@ -574,29 +579,38 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           <div className="flex items-center gap-2 md:gap-3 ml-auto">
             {/* Compact Upgrade Button */}
-            <button
-              onClick={() => setActiveModal('upgrade')}
-              className="hidden sm:flex items-center gap-2 bg-deepNavy dark:bg-white text-white dark:text-deepNavy font-bold text-sm pl-3 pr-4 py-2.5 rounded-none shadow-sm hover:shadow-md hover:opacity-90 transition-all"
-            >
-              <Crown className="w-4 h-4" />
-              <span className="hidden md:inline">Upgrade plan</span>
-            </button>
+            {/* Compact Upgrade Button */}
+            {!isPremium && (
+              <button
+                onClick={() => setActiveModal('upgrade')}
+                className="hidden sm:flex items-center gap-2 bg-deepNavy dark:bg-white text-white dark:text-deepNavy font-bold text-sm pl-3 pr-4 py-2.5 rounded-none shadow-sm hover:shadow-md hover:opacity-90 transition-all"
+              >
+                <Crown className="w-4 h-4" />
+                <span className="hidden md:inline">Upgrade plan</span>
+              </button>
+            )}
 
             {/* Free Tier Indicator */}
             <div className="hidden md:flex items-center gap-3 bg-white dark:bg-darkCard px-4 py-2 rounded-none border border-softBorder dark:border-darkBorder shadow-sm">
-              <span className="text-xs font-bold text-deepNavy dark:text-white uppercase tracking-wider">Free Plan</span>
-              <div className="h-4 w-[1px] bg-softBorder dark:bg-darkBorder"></div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-steelGray dark:text-darkMuted">{remainingFreeNotes} left</span>
-                <div className="flex gap-1">
-                  {[...Array(FREE_TIER_LIMIT)].map((_, i) => (
-                    <div
-                      key={i}
-                      className={`w-2 h-2 rounded-none transition-colors ${i < (FREE_TIER_LIMIT - remainingFreeNotes) ? 'bg-steelGray dark:bg-darkMuted' : 'bg-primaryGold animate-pulse'}`}
-                    />
-                  ))}
-                </div>
-              </div>
+              <span className={`text-xs font-bold uppercase tracking-wider ${isPremium ? 'text-primaryGold' : 'text-deepNavy dark:text-white'}`}>
+                {isPremium ? 'Unlimited' : 'Free Plan'}
+              </span>
+              {!isPremium && (
+                <>
+                  <div className="h-4 w-[1px] bg-softBorder dark:bg-darkBorder"></div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-steelGray dark:text-darkMuted">{remainingFreeNotes} left</span>
+                    <div className="flex gap-1">
+                      {[...Array(FREE_TIER_LIMIT)].map((_, i) => (
+                        <div
+                          key={i}
+                          className={`w-2 h-2 rounded-none transition-colors ${i < (FREE_TIER_LIMIT - remainingFreeNotes) ? 'bg-steelGray dark:bg-darkMuted' : 'bg-primaryGold animate-pulse'}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             <button
@@ -750,9 +764,43 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-deepNavy dark:text-white">{user?.user_metadata?.full_name || 'Guest User'}</h2>
-                  <p className="text-sm text-steelGray dark:text-darkMuted">Free Plan • {history.length} study sets</p>
+                  <p className="text-sm text-steelGray dark:text-darkMuted">
+                    {isPremium ? <span className="text-primaryGold font-bold">Premium Plan</span> : 'Free Plan'} • {history.length} study sets
+                  </p>
                 </div>
               </div>
+
+              {isPremium && subscriptionId && (
+                <div className="mb-12">
+                  <h3 className="text-lg font-bold text-deepNavy dark:text-white mb-2">Subscription</h3>
+                  <p className="text-sm text-steelGray dark:text-darkMuted mb-6">Manage your plan details and billing</p>
+
+                  <button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('/api/payment/portal', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ subscriptionId }),
+                        });
+                        const data = await response.json();
+                        if (data.url) {
+                          window.location.href = data.url;
+                        } else {
+                          alert('Failed to get portal link: ' + (data.error || 'Unknown error'));
+                        }
+                      } catch (e) {
+                        console.error(e);
+                        alert('Error redirecting to portal');
+                      }
+                    }}
+                    className="flex items-center gap-3 px-6 py-3 bg-primaryGold text-white font-bold rounded-none hover:opacity-90 transition-opacity shadow-sm"
+                  >
+                    <Settings className="w-5 h-5" />
+                    Manage Subscription
+                  </button>
+                </div>
+              )}
 
               <div className="mb-12">
                 <h3 className="text-lg font-bold text-deepNavy dark:text-white mb-2">Privacy settings</h3>
