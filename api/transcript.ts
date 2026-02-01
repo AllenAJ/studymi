@@ -1,4 +1,6 @@
 import https from 'https';
+import { getUser } from './_utils/auth';
+import { rateLimit } from './_utils/rate-limit';
 
 export const config = {
   runtime: 'nodejs',
@@ -206,7 +208,26 @@ export default async function handler(req: any, res: any) {
     return res.status(400).json({ error: 'Missing video ID', transcript: '', success: false });
   }
 
+  // Security Check
+  const user = await getUser(req);
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized: Please log in' });
+  }
+
+  // Rate Limit
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const identifier = user.id || ip;
+
+  if (!rateLimit(identifier, 20, 60000)) { // 20 requests per minute (higher for fetch)
+    return res.status(429).json({ error: 'Too many requests' });
+  }
+
   const videoId = extractVideoId(videoIdParam) || videoIdParam;
+
+  // Strict Validation for ID (11 chars alphanumeric)
+  if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
+    return res.status(400).json({ error: 'Invalid video ID format' });
+  }
 
   try {
     console.log('Fetching transcript for:', videoId);

@@ -6,6 +6,8 @@ interface LandingPageProps {
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
+  // SEO-optimized wording
+  const H1_SUBTITLE = "The AI Note Taking App that turns 'huh?' into 'ohhh, got it.'";
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const toggleFaq = (index: number) => {
@@ -73,9 +75,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
             Just Studymi.
           </span>
         </h1>
-        <p className="text-steelGray text-lg md:text-xl max-w-lg mb-10 font-medium leading-relaxed">
-          Your buddy that turns “huh?” into “ohhh, got it.”
-        </p>
+        <h2 className="text-steelGray text-lg md:text-xl max-w-lg mb-10 font-medium leading-relaxed">
+          {H1_SUBTITLE}
+        </h2>
 
         <button
           onClick={onStart}
@@ -126,9 +128,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                   <Mic className="w-6 h-6 text-deepNavy" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-deepNavy mb-3 lowercase">Record & Transcribe</h3>
+                  <h3 className="text-2xl font-bold text-deepNavy mb-3 lowercase">Record & Transcribe Lectures</h3>
                   <p className="text-steelGray text-base leading-relaxed">
-                    Record and transcribe your lectures, meetings, interviews, and more with our AI-powered platform.
+                    Record and transcribe your lectures, meetings, and classes with our AI note taking platform.
                   </p>
                 </div>
               </div>
@@ -170,9 +172,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                   <FileText className="w-6 h-6 text-deepNavy" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-deepNavy mb-3 lowercase">Remembers Everything</h3>
+                  <h3 className="text-2xl font-bold text-deepNavy mb-3 lowercase">AI Summaries & Notes</h3>
                   <p className="text-steelGray text-base leading-relaxed">
-                    Studymi keeps your whole story in mind. It learns from every conversation, getting to know you better.
+                    Studymi generates concise summaries and organized notes from any PDF, audio, or video.
                   </p>
                 </div>
               </div>
@@ -194,7 +196,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                 <div>
                   <h3 className="text-2xl font-bold text-deepNavy mb-3 lowercase">Mindmaps, Quizzes & Flashcards</h3>
                   <p className="text-steelGray text-base leading-relaxed">
-                    Generate mindmaps, quizzes and flashcards from your notes to help you learn and memorize the content.
+                    Generate visual mindmaps, practice quizzes, and Anki-style flashcards instantly.
                   </p>
                 </div>
               </div>

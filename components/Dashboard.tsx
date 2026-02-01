@@ -3,7 +3,12 @@ import { Mic, FileText, Sparkles, Clock, ThumbsUp, Home, ArrowRight, X, Star, Se
 import { InputType, StudySet } from '../types';
 
 // Free tier limit
+// Free tier limit
 const FREE_TIER_LIMIT = 3;
+
+// File size limits
+const MAX_PDF_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_AUDIO_SIZE = 10 * 1024 * 1024; // 10MB
 
 interface DashboardProps {
   user: any;
@@ -336,6 +341,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       mediaRecorder.onstop = () => {
         const blob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+
+        // Check size limit
+        if (blob.size > MAX_AUDIO_SIZE) {
+          alert(`Recording exceeds the 10MB limit. Please keep recordings shorter.`);
+          setActiveModal(null);
+          return;
+        }
+
         const reader = new FileReader();
         reader.readAsDataURL(blob);
         reader.onloadend = () => {
@@ -408,10 +421,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
     const reader = new FileReader();
     reader.onload = () => {
-      const base64String = (reader.result as string).split(',')[1];
       const mimeType = file.type;
       const type: InputType = mimeType.includes('audio') ? 'audio' : 'pdf';
 
+      // Validate file size
+      if (type === 'pdf' && file.size > MAX_PDF_SIZE) {
+        alert('PDF file size exceeds 5MB limit. Please upload a smaller file.');
+        return;
+      }
+      if (type === 'audio' && file.size > MAX_AUDIO_SIZE) {
+        alert('Audio file size exceeds 10MB limit. Please upload a smaller file.');
+        return;
+      }
+
+      const base64String = (reader.result as string).split(',')[1];
       processWithLimitCheck(base64String, type, mimeType, isGenZMode);
       setActiveModal(null);
     };

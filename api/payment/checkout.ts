@@ -1,4 +1,6 @@
 import DodoPayments from 'dodopayments';
+import { getUser } from '../_utils/auth';
+import { rateLimit } from '../_utils/rate-limit';
 
 export const config = {
     runtime: 'nodejs',
@@ -38,6 +40,21 @@ export default async function handler(req: any, res: any) {
     });
 
     const { plan, returnUrl, customerEmail, customerName, userId } = req.body;
+
+    // Security Check
+    const user = await getUser(req);
+    if (!user) {
+        return res.status(401).json({ error: 'Unauthorized: Please log in' });
+    }
+
+    if (!userId || user.id !== userId) {
+        return res.status(403).json({ error: 'Forbidden: User ID mismatch' });
+    }
+
+    // Rate Limit (Strict for payments: 5 per minute)
+    if (!rateLimit(user.id, 5, 60000)) {
+        return res.status(429).json({ error: 'Too many payment attempts' });
+    }
 
     let productId;
     if (plan === 'monthly') {

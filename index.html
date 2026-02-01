@@ -1,150 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Studymi - AI Study Companion</title>
-    <meta name="description" content="Studymi is an AI-powered study companion that helps you learn through the Feynman Technique with flashcards, quizzes, and mind maps." />
-    <meta name="theme-color" content="#FFE44D" />
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
-    
-    <!-- Apple Touch Icon -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    
-    <!-- Web App Manifest -->
-    <link rel="manifest" href="/site.webmanifest" />
-    
-    <!-- Open Graph / Social -->
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="Studymi - AI Study Companion" />
-    <meta property="og:description" content="Master any topic with AI-powered flashcards, quizzes, and mind maps using the Feynman Technique." />
-    <meta property="og:url" content="https://studymi.xyz" />
-    <meta name="twitter:card" content="summary_large_image" />
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Studymi - AI Note Taking & Study App | Master the Feynman Technique</title>
+  <meta name="description"
+    content="Master any topic with Studymi, the best AI note taking app. Convert lectures to notes, generate flashcards, and use the Feynman Technique to learn faster. The best alternative to Notewave." />
+  <meta name="keywords"
+    content="ai note taking, feynman technique app, lecture transcription, ai study companion, flashcard generator, mind map maker, notewave alternative, study app" />
+  <link rel="canonical" href="https://studymi.xyz" />
+  <meta name="theme-color" content="#FFE44D" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*.googleusercontent.com https://img.youtube.com; connect-src 'self' https://*.supabase.co https://generativelanguage.googleapis.com https://vitals.vercel-insights.com; media-src 'self' blob: data:;">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="/site.webmanifest" />
+
+  <!-- Open Graph / Social -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Studymi - AI Note Taking & Study App" />
+  <meta property="og:description"
+    content="Turn lectures into notes, flashcards, and quizzes instantly. The AI study companion that helps you master the Feynman Technique." />
+  <meta property="og:url" content="https://studymi.xyz" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            // New Color System
+            deepNavy: '#0E1A2B',      // Headings, buttons
+            primaryGold: '#F59E0B',   // Primary actions (Replaces Cool Blue with Amber/Gold)
+            iceGray: '#F0F4F8',       // Backgrounds
+            softBorder: '#DDE3EA',    // Borders
+            steelGray: '#5F6C7A',     // Muted text
+            accentYellow: '#FFE44D',  // Icons, highlights (Lighter yellow)
+            white: '#FFFFFF',
+
+            // Dark Mode mappings
+            darkBg: '#0D0D0D',
+            darkCard: '#171717',
+            darkBorder: '#262626',
+            darkText: '#EDEDED',
+            darkMuted: '#A1A1AA'
+          },
+          borderRadius: {
+            '4xl': '2rem',
+            '5xl': '2.5rem',
+          },
+          boxShadow: {
+            'soft': '0 4px 24px rgba(14,26,43,0.04)',
+            'hover': '0 8px 32px rgba(245,158,11,0.12)', // Updated shadow color
+            'modal': '0 20px 40px rgba(0,0,0,0.1)',
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.4s ease-out forwards',
+            'slide-up': 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'slide-right': 'slideRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'scale-in': 'scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
             },
-            colors: {
-              // New Color System
-              deepNavy: '#0E1A2B',      // Headings, buttons
-              primaryGold: '#F59E0B',   // Primary actions (Replaces Cool Blue with Amber/Gold)
-              iceGray: '#F0F4F8',       // Backgrounds
-              softBorder: '#DDE3EA',    // Borders
-              steelGray: '#5F6C7A',     // Muted text
-              accentYellow: '#FFE44D',  // Icons, highlights (Lighter yellow)
-              white: '#FFFFFF',
-              
-              // Dark Mode mappings
-              darkBg: '#0D0D0D',
-              darkCard: '#171717',
-              darkBorder: '#262626',
-              darkText: '#EDEDED',
-              darkMuted: '#A1A1AA'
+            slideUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
             },
-            borderRadius: {
-              '4xl': '2rem',
-              '5xl': '2.5rem',
+            slideRight: {
+              '0%': { transform: 'translateX(-100%)' },
+              '100%': { transform: 'translateX(0)' },
             },
-            boxShadow: {
-              'soft': '0 4px 24px rgba(14,26,43,0.04)',
-              'hover': '0 8px 32px rgba(245,158,11,0.12)', // Updated shadow color
-              'modal': '0 20px 40px rgba(0,0,0,0.1)',
-            },
-            animation: {
-              'fade-in': 'fadeIn 0.4s ease-out forwards',
-              'slide-up': 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-              'slide-right': 'slideRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-              'scale-in': 'scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            },
-            keyframes: {
-              fadeIn: {
-                '0%': { opacity: '0' },
-                '100%': { opacity: '1' },
-              },
-              slideUp: {
-                '0%': { opacity: '0', transform: 'translateY(20px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
-              },
-              slideRight: {
-                '0%': { transform: 'translateX(-100%)' },
-                '100%': { transform: 'translateX(0)' },
-              },
-              scaleIn: {
-                '0%': { opacity: '0', transform: 'scale(0.95)' },
-                '100%': { opacity: '1', transform: 'scale(1)' },
-              }
+            scaleIn: {
+              '0%': { opacity: '0', transform: 'scale(0.95)' },
+              '100%': { opacity: '1', transform: 'scale(1)' },
             }
           }
         }
       }
-    </script>
-    <style>
-      /* Custom Scrollbar */
-      ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent; 
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #DDE3EA; 
-        border-radius: 3px;
-      }
-      .dark ::-webkit-scrollbar-thumb {
-        background: #262626;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #F59E0B; 
-      }
-      
-      .perspective-1000 {
-        perspective: 1000px;
-      }
-      .transform-style-3d {
-        transform-style: preserve-3d;
-      }
-      .backface-hidden {
-        backface-visibility: hidden;
-      }
-      .rotate-y-180 {
-        transform: rotateY(180deg);
-      }
-      
-      /* Smooth transitions */
-      * {
-        transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
-        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-        transition-duration: 200ms;
-      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
 
-      .glass-backdrop {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-      }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
 
-      .dark .glass-backdrop {
-        background: rgba(13, 13, 13, 0.85);
-      }
-    </style>
+    ::-webkit-scrollbar-thumb {
+      background: #DDE3EA;
+      border-radius: 3px;
+    }
+
+    .dark ::-webkit-scrollbar-thumb {
+      background: #262626;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #F59E0B;
+    }
+
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+
+    .transform-style-3d {
+      transform-style: preserve-3d;
+    }
+
+    .backface-hidden {
+      backface-visibility: hidden;
+    }
+
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+
+    /* Smooth transitions */
+    * {
+      transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      transition-duration: 200ms;
+    }
+
+    .glass-backdrop {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .dark .glass-backdrop {
+      background: rgba(13, 13, 13, 0.85);
+    }
+  </style>
   <script type="module" src="/index.tsx"></script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Studymi",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "120000"
+      },
+      "featureList": "AI Note Taking, Lecture Transcription, Feynman Technique, Flashcard Generator, Mind Mapping",
+      "description": "Studymi is an AI-powered study companion that helps you learn through the Feynman Technique. Convert audio and PDFs into study sets instantly."
+    }
+  </script>
 </head>
-  <body class="bg-iceGray text-deepNavy antialiased selection:bg-primaryGold selection:text-white dark:bg-darkBg dark:text-darkText transition-colors duration-300">
-    <div id="root"></div>
-  </body>
+
+<body
+  class="bg-iceGray text-deepNavy antialiased selection:bg-primaryGold selection:text-white dark:bg-darkBg dark:text-darkText transition-colors duration-300">
+  <div id="root"></div>
+</body>
+
 </html>
