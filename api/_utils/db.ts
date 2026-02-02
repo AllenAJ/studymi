@@ -4,7 +4,20 @@ const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
 const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || '';
 
 // Create a single supabase client for interacting with your database
-const supabase = createClient(supabaseUrl, supabaseKey);
+let supabase: any = null;
+
+const getSupabase = () => {
+    if (!supabase) {
+        const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
+        const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || '';
+        if (supabaseUrl && supabaseKey) {
+            supabase = createClient(supabaseUrl, supabaseKey);
+        } else {
+            console.error('Missing Supabase Environment Variables in db.ts');
+        }
+    }
+    return supabase;
+};
 
 export const logUsage = async (
     userId: string,
@@ -14,7 +27,10 @@ export const logUsage = async (
     details: any = {}
 ) => {
     try {
-        const { error } = await supabase
+        const client = getSupabase();
+        if (!client) return;
+
+        const { error } = await client
             .from('usage_logs')
             .insert({
                 user_id: userId,
@@ -34,11 +50,14 @@ export const logUsage = async (
 
 export const checkUsageLimit = async (userId: string, limit: number = 2000000): Promise<boolean> => {
     try {
+        const client = getSupabase();
+        if (!client) return true; // Fail open if DB is missing
+
         const startOfMonth = new Date();
         startOfMonth.setDate(1);
         startOfMonth.setHours(0, 0, 0, 0);
 
-        const { data, error } = await supabase
+        const { data, error } = await client
             .from('usage_logs')
             .select('input_tokens, output_tokens')
             .eq('user_id', userId)
@@ -49,7 +68,7 @@ export const checkUsageLimit = async (userId: string, limit: number = 2000000): 
             return true; // Fail open to avoid blocking legitimate users on error
         }
 
-        const totalTokens = data.reduce((sum, log) => sum + (log.input_tokens || 0) + (log.output_tokens || 0), 0);
+        const totalTokens = data.reduce((sum: number, log: any) => sum + (log.input_tokens || 0) + (log.output_tokens || 0), 0);
         return totalTokens < limit;
 
     } catch (err) {
@@ -60,7 +79,10 @@ export const checkUsageLimit = async (userId: string, limit: number = 2000000): 
 
 export const getProfile = async (userId: string) => {
     try {
-        const { data, error } = await supabase
+        const client = getSupabase();
+        if (!client) return null;
+
+        const { data, error } = await client
             .from('profiles')
             .select('is_premium')
             .eq('id', userId)
@@ -72,4 +94,3 @@ export const getProfile = async (userId: string) => {
         return null;
     }
 };
-```
