@@ -647,9 +647,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <span className="text-xs font-bold text-deepNavy dark:text-darkText hidden md:inline">gen z</span>
               <button
                 onClick={() => setIsGenZMode(!isGenZMode)}
-                className={`w-9 h-5 rounded-none transition-colors relative ${isGenZMode ? 'bg-primaryGold' : 'bg-softBorder dark:bg-darkBorder'}`}
+                className={`w-9 h-5 rounded-none transition-colors duration-300 ease-in-out relative ${isGenZMode ? 'bg-primaryGold' : 'bg-softBorder dark:bg-darkBorder'}`}
               >
-                <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-none shadow-md transition-transform duration-300 ${isGenZMode ? 'left-[18px]' : 'left-0.5'}`} />
+                <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-none shadow-md transition-all duration-300 ease-in-out ${isGenZMode ? 'left-[18px]' : 'left-0.5'}`} />
               </button>
             </div>
           </div>

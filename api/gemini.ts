@@ -79,6 +79,7 @@ const TEACH_BACK_SCHEMA = {
 
 import { getUser } from './_utils/auth';
 import { rateLimit } from './_utils/rate-limit';
+import { logUsage, checkUsageLimit, getProfile } from './_utils/db';
 
 const ALLOWED_ACTIONS = ['generateStudySet', 'gradeTeachBack'];
 const MAX_PROMPT_LENGTH = 20000;
@@ -108,6 +109,16 @@ export default async function handler(req: any, res: any) {
 
     if (!rateLimit(identifier, 10, 60000)) { // 10 requests per minute
         return res.status(429).json({ error: 'Too many requests. Please try again later.' });
+    }
+
+    // Monthly Quota Check
+    if (user.id) {
+        const profile = await getProfile(user.id);
+        const limit = profile?.is_premium ? 50000000 : 2000000;
+
+        if (!(await checkUsageLimit(user.id, limit))) {
+            return res.status(403).json({ error: 'Monthly usage limit exceeded. Please upgrade or wait until next month.' });
+        }
     }
 
     const { action, prompt, isGenZ, inlineData } = req.body;
@@ -178,6 +189,13 @@ export default async function handler(req: any, res: any) {
         } else if (cleanText.includes('```')) {
             cleanText = cleanText.replace(/```\n?/, '').replace(/\n?```$/, '');
         }
+
+        // Calculate simplified token usage (approx: 4 chars = 1 token)
+        const inputEst = prompt.length / 4;
+        const outputEst = cleanText.length / 4;
+
+        // Fire and forget logging
+        logUsage(user.id, `gemini_${action}`, Math.ceil(inputEst), Math.ceil(outputEst));
 
         return res.status(200).json({ result: JSON.parse(cleanText.trim()) });
     } catch (error: any) {

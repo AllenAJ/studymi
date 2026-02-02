@@ -59,6 +59,18 @@ CREATE TABLE feedback (
   rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
   text TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Usage Logs table (Internal System Table)
+CREATE TABLE usage_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  feature TEXT NOT NULL,
+  input_tokens INTEGER DEFAULT 0,
+  output_tokens INTEGER DEFAULT 0,
+  details JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Create indexes for better performance
@@ -69,7 +81,18 @@ CREATE INDEX idx_feedback_user_id ON feedback(user_id);
 -- Enable Row Level Security (RLS)
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE study_sets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE study_sets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;
+ALTER TABLE usage_logs ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies for usage_logs
+CREATE POLICY "Users can insert their own usage logs"
+  ON usage_logs FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can view their own usage logs"
+  ON usage_logs FOR SELECT
+  USING (auth.uid() = user_id);
 
 -- RLS Policies for profiles
 CREATE POLICY "Users can view their own profile"

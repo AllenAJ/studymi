@@ -1,6 +1,7 @@
 import https from 'https';
 import { getUser } from './_utils/auth';
 import { rateLimit } from './_utils/rate-limit';
+import { logUsage, checkUsageLimit, getProfile } from './_utils/db';
 
 export const config = {
   runtime: 'nodejs',
@@ -222,6 +223,16 @@ export default async function handler(req: any, res: any) {
     return res.status(429).json({ error: 'Too many requests' });
   }
 
+  // Monthly Quota Check
+  if (user.id) {
+    const profile = await getProfile(user.id);
+    const limit = profile?.is_premium ? 50000000 : 2000000;
+
+    if (!(await checkUsageLimit(user.id, limit))) {
+      return res.status(403).json({ error: 'Monthly usage limit exceeded.' });
+    }
+  }
+
   const videoId = extractVideoId(videoIdParam) || videoIdParam;
 
   // Strict Validation for ID (11 chars alphanumeric)
@@ -233,6 +244,10 @@ export default async function handler(req: any, res: any) {
     console.log('Fetching transcript for:', videoId);
     const result = await getSubtitles(videoId, 'en');
     const transcript = result.lines.join(' ');
+
+    // Log Usage (Transcript length / 4)
+    const tokenEst = transcript.length / 4;
+    logUsage(user.id, 'transcript_fetch', 0, Math.ceil(tokenEst), { videoId });
 
     return res.status(200).json({
       transcript,
