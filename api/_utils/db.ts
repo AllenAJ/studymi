@@ -8,10 +8,17 @@ let supabase: any = null;
 
 const getSupabase = () => {
     if (!supabase) {
-        const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
-        const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || '';
+        const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
+        // Prioritize Service Role Key for server-side operations to bypass RLS
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '';
         if (supabaseUrl && supabaseKey) {
             supabase = createClient(supabaseUrl, supabaseKey);
+            // Debug log to check if we are using the Service Role Key
+            if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+                console.log('Using Service Role Key for DB connection');
+            } else {
+                console.log('Using Anon Key for DB connection (RLS might block inserts)');
+            }
         } else {
             console.error('Missing Supabase Environment Variables in db.ts');
         }

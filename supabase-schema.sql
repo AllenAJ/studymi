@@ -43,6 +43,7 @@ CREATE TABLE study_sets (
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   title TEXT NOT NULL,
   summary TEXT,
+  detailed_notes TEXT,
   key_concepts JSONB DEFAULT '[]'::jsonb,
   flashcards JSONB DEFAULT '[]'::jsonb,
   quiz JSONB DEFAULT '[]'::jsonb,

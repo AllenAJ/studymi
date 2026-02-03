@@ -99,6 +99,7 @@ export const saveStudySet = async (userId: string, studySet: any) => {
       user_id: userId,
       title: studySet.title,
       summary: studySet.summary,
+      detailed_notes: studySet.detailedNotes,
       key_concepts: studySet.keyConcepts,
       flashcards: studySet.flashcards,
       quiz: studySet.quiz,
@@ -154,3 +155,16 @@ export const deleteUserAccount = async () => {
   return { error };
 };
 
+
+// Waitlist helper
+export const joinWaitlist = async (email: string, utmParams: any = {}) => {
+  const { data, error } = await supabase
+    .from('waitlist')
+    .insert({
+      email,
+      ...utmParams,
+    })
+    .select()
+    .single();
+  return { data, error };
+};

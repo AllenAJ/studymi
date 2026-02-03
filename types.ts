@@ -23,6 +23,7 @@ export interface StudySet {
   id: string;
   title: string;
   summary: string; // The "Simple Explanation"
+  detailedNotes?: string; // HTML formatted detailed notes
   keyConcepts: string[];
   flashcards: Flashcard[];
   quiz: QuizQuestion[];

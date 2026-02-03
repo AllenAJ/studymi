@@ -20,6 +20,7 @@ const STUDY_SET_SCHEMA = {
     properties: {
         title: { type: "STRING" },
         summary: { type: "STRING" },
+        detailedNotes: { type: "STRING" },
         keyConcepts: { type: "ARRAY", items: { type: "STRING" } },
         flashcards: {
             type: "ARRAY",
@@ -63,7 +64,7 @@ const STUDY_SET_SCHEMA = {
             required: ["name", "children"]
         }
     },
-    required: ["title", "summary", "keyConcepts", "flashcards", "quiz", "mindMap"]
+    required: ["title", "summary", "detailedNotes", "keyConcepts", "flashcards", "quiz", "mindMap"]
 };
 
 const TEACH_BACK_SCHEMA = {
@@ -89,60 +90,67 @@ export default async function handler(req: any, res: any) {
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
-
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
-    }
-
-    // Security Check
-    const user = await getUser(req);
-    if (!user) {
-        return res.status(401).json({ error: 'Unauthorized: Please log in' });
-    }
-
-    // Rate Limit (ID-based for logged in users)
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    const identifier = user.id || ip;
-
-    if (!rateLimit(identifier, 10, 60000)) { // 10 requests per minute
-        return res.status(429).json({ error: 'Too many requests. Please try again later.' });
-    }
-
-    // Monthly Quota Check
-    if (user.id) {
-        const profile = await getProfile(user.id);
-        const limit = profile?.is_premium ? 50000000 : 2000000;
-
-        if (!(await checkUsageLimit(user.id, limit))) {
-            return res.status(403).json({ error: 'Monthly usage limit exceeded. Please upgrade or wait until next month.' });
-        }
-    }
-
-    const { action, prompt, isGenZ, inlineData } = req.body;
-
-    // Input Validation
-    if (!ALLOWED_ACTIONS.includes(action)) {
-        return res.status(400).json({ error: 'Invalid action' });
-    }
-
-    if (!prompt || typeof prompt !== 'string' || prompt.length > MAX_PROMPT_LENGTH) {
-        return res.status(400).json({ error: 'Invalid prompt: Too long or missing' });
-    }
-
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-        return res.status(500).json({ error: 'Gemini API key not configured' });
-    }
-
-
-
-    const systemInstruction = isGenZ ? GEN_Z_SYSTEM_INSTRUCTION : BASE_SYSTEM_INSTRUCTION;
-    const schema = action === 'gradeTeachBack' ? TEACH_BACK_SCHEMA : STUDY_SET_SCHEMA;
-
+    // Global Error Handler
     try {
+        if (req.method === 'OPTIONS') {
+            return res.status(200).end();
+        }
+
+        if (req.method !== 'POST') {
+            return res.status(405).json({ error: 'Method not allowed' });
+        }
+
+        // Security Check
+        let user;
+        try {
+            user = await getUser(req);
+        } catch (e) {
+            console.error('Auth check crashed:', e);
+            return res.status(500).json({ error: 'Authentication service unavailable' });
+        }
+
+        if (!user) {
+            return res.status(401).json({ error: 'Unauthorized: Please log in' });
+        }
+
+        // Rate Limit (ID-based for logged in users)
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const identifier = user.id || ip;
+
+        if (!rateLimit(identifier, 10, 60000)) { // 10 requests per minute
+            return res.status(429).json({ error: 'Too many requests. Please try again later.' });
+        }
+
+        // Monthly Quota Check
+        if (user.id) {
+            const profile = await getProfile(user.id);
+            const limit = profile?.is_premium ? 50000000 : 2000000;
+
+            if (!(await checkUsageLimit(user.id, limit))) {
+                return res.status(403).json({ error: 'Monthly usage limit exceeded. Please upgrade or wait until next month.' });
+            }
+        }
+
+        const { action, prompt, isGenZ, inlineData } = req.body;
+
+        // Input Validation
+        if (!ALLOWED_ACTIONS.includes(action)) {
+            return res.status(400).json({ error: 'Invalid action' });
+        }
+
+        if (!prompt || typeof prompt !== 'string' || prompt.length > MAX_PROMPT_LENGTH) {
+            return res.status(400).json({ error: 'Invalid prompt: Too long or missing' });
+        }
+
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            console.error('Missing GEMINI_API_KEY');
+            return res.status(500).json({ error: 'Server misconfiguration: Missing API Key' });
+        }
+
+        const systemInstruction = isGenZ ? GEN_Z_SYSTEM_INSTRUCTION : BASE_SYSTEM_INSTRUCTION;
+        const schema = action === 'gradeTeachBack' ? TEACH_BACK_SCHEMA : STUDY_SET_SCHEMA;
+
         // Build parts for request
         const parts: any[] = [];
         if (inlineData) {
@@ -195,11 +203,19 @@ export default async function handler(req: any, res: any) {
         const outputEst = cleanText.length / 4;
 
         // Fire and forget logging
-        logUsage(user.id, `gemini_${action}`, Math.ceil(inputEst), Math.ceil(outputEst));
+        try {
+            logUsage(user.id, `gemini_${action}`, Math.ceil(inputEst), Math.ceil(outputEst));
+        } catch (logError) {
+            console.warn('Logging failed but processing continued:', logError);
+        }
 
         return res.status(200).json({ result: JSON.parse(cleanText.trim()) });
-    } catch (error: any) {
-        console.error('Gemini request error:', error.message);
-        return res.status(500).json({ error: error.message });
+
+    } catch (criticalError: any) {
+        console.error('CRITICAL SERVER ERROR:', criticalError);
+        return res.status(500).json({
+            error: 'Internal Server Error',
+            message: criticalError.message
+        });
     }
 }

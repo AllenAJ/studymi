@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { generateStudySet } from './services/geminiService';
 import { supabase, getProfile, upsertProfile, saveStudySet, getStudySets, deleteStudySet, deleteAllStudySets, submitFeedback } from './services/supabase';
 import { StudySet, InputType } from './types';
@@ -9,6 +9,7 @@ import { StudyView } from './components/StudyView';
 import { Onboarding, OnboardingData } from './components/Onboarding';
 import { LegalPage } from './components/LegalPage';
 import { PricingPage } from './components/PricingPage';
+import { WaitlistPage } from './components/WaitlistPage';
 import { User } from '@supabase/supabase-js';
 import { usePostHog } from 'posthog-js/react';
 
@@ -25,6 +26,7 @@ const App: React.FC = () => {
     if (path === '/disclaimer') return 'disclaimer';
     if (path === '/refund') return 'refund';
     if (path === '/pricing') return 'pricing';
+    if (path === '/access') return 'auth';
     return 'loading';
   };
 
@@ -54,6 +56,7 @@ const App: React.FC = () => {
       else if (path === '/disclaimer') setView('disclaimer');
       else if (path === '/refund') setView('refund');
       else if (path === '/pricing') setView('pricing');
+      else if (path === '/access') setView('auth');
       else if (path === '/' || path === '') {
         // Return to appropriate view based on auth state
         if (user) setView('dashboard');
@@ -78,27 +81,33 @@ const App: React.FC = () => {
     else setView('landing');
   };
 
+  // Track last authenticated user to prevent redundant loads/redirects
+  const lastAuthUser = useRef<string | null>(null);
+
   // Check auth state on mount
   useEffect(() => {
-    // Skip auth redirect if on legal pages or pricing
-    const isLegalPage = ['privacy', 'terms', 'disclaimer', 'refund', 'pricing'].includes(view);
+    // Skip auth redirect if on legal pages, pricing, or auth (admin access)
+    const isLegalPage = ['privacy', 'terms', 'disclaimer', 'refund', 'pricing', 'auth'].includes(view);
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        setUser(session.user);
+        if (lastAuthUser.current !== session.user.id) {
+          lastAuthUser.current = session.user.id;
+          setUser(session.user);
 
-        // Identify user in PostHog
-        if (posthog) {
-          posthog.identify(session.user.id, {
-            email: session.user.email,
-            name: session.user.user_metadata?.full_name
-          });
-        }
+          // Identify user in PostHog
+          if (posthog) {
+            posthog.identify(session.user.id, {
+              email: session.user.email,
+              name: session.user.user_metadata?.full_name
+            });
+          }
 
-        // Only load user data and redirect if not on a legal page
-        if (!isLegalPage) {
-          loadUserData(session.user.id);
+          // Only load user data and redirect if not on a legal page
+          if (!isLegalPage) {
+            loadUserData(session.user.id);
+          }
         }
       } else if (!isLegalPage) {
         // Only redirect to landing if not on a legal page
@@ -109,19 +118,24 @@ const App: React.FC = () => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
-        setUser(session.user);
+        // Only act if the user ID actually changed
+        if (lastAuthUser.current !== session.user.id) {
+          lastAuthUser.current = session.user.id;
+          setUser(session.user);
 
-        // Identify user
-        if (posthog) {
-          posthog.identify(session.user.id, {
-            email: session.user.email,
-            name: session.user.user_metadata?.full_name
-          });
-          posthog.capture('auth_complete');
+          // Identify user
+          if (posthog) {
+            posthog.identify(session.user.id, {
+              email: session.user.email,
+              name: session.user.user_metadata?.full_name
+            });
+            posthog.capture('auth_complete');
+          }
+
+          loadUserData(session.user.id);
         }
-
-        loadUserData(session.user.id);
       } else if (event === 'SIGNED_OUT') {
+        lastAuthUser.current = null;
         setUser(null);
         setUserName('');
         setHistory([]);
@@ -151,6 +165,7 @@ const App: React.FC = () => {
           id: set.id,
           title: set.title,
           summary: set.summary,
+          detailedNotes: set.detailed_notes,
           keyConcepts: set.key_concepts,
           flashcards: set.flashcards.map((f: any, i: number) => ({ ...f, id: `fc-${i}` })),
           quiz: set.quiz.map((q: any, i: number) => ({ ...q, id: `q-${i}` })),
@@ -187,6 +202,7 @@ const App: React.FC = () => {
           id: set.id,
           title: set.title,
           summary: set.summary,
+          detailedNotes: set.detailed_notes,
           keyConcepts: set.key_concepts,
           flashcards: set.flashcards.map((f: any, i: number) => ({ ...f, id: `fc-${i}` })),
           quiz: set.quiz.map((q: any, i: number) => ({ ...q, id: `q-${i}` })),
@@ -380,7 +396,7 @@ const App: React.FC = () => {
     return <PricingPage onBack={handleLegalBack} />;
   }
 
-  return <LandingPage onStart={handleStart} />;
+  return <WaitlistPage />;
 };
 
 export default App;

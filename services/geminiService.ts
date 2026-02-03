@@ -85,10 +85,11 @@ async function callGeminiLocal(prompt: string, action: string, isGenZ: boolean, 
     properties: {
       title: { type: Type.STRING },
       summary: { type: Type.STRING },
+      detailedNotes: { type: Type.STRING },
       keyConcepts: { type: Type.ARRAY, items: { type: Type.STRING }, description: "5 core concepts" },
       flashcards: {
         type: Type.ARRAY,
-        description: "8 flashcards",
+        description: "Flashcards (minimum 5)",
         items: {
           type: Type.OBJECT,
           properties: { front: { type: Type.STRING }, back: { type: Type.STRING } },
@@ -97,7 +98,7 @@ async function callGeminiLocal(prompt: string, action: string, isGenZ: boolean, 
       },
       quiz: {
         type: Type.ARRAY,
-        description: "6 quiz questions",
+        description: "Quiz questions (minimum 3)",
         items: {
           type: Type.OBJECT,
           properties: {
@@ -130,7 +131,7 @@ async function callGeminiLocal(prompt: string, action: string, isGenZ: boolean, 
         required: ["name", "children"]
       }
     },
-    required: ["title", "summary", "keyConcepts", "flashcards", "quiz", "mindMap"]
+    required: ["title", "summary", "detailedNotes", "keyConcepts", "flashcards", "quiz", "mindMap"]
   };
 
   const response = await ai.models.generateContent({
@@ -155,6 +156,26 @@ async function callGeminiLocal(prompt: string, action: string, isGenZ: boolean, 
     cleanText = cleanText.replace(/```\n?/, '').replace(/\n?```$/, '');
   }
 
+  // Log usage if logged in
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.user) {
+    try {
+      // Gemini SDK provides usage metadata
+      const inputTokens = response.usageMetadata?.promptTokenCount || Math.ceil(prompt.length / 4);
+      const outputTokens = response.usageMetadata?.candidatesTokenCount || Math.ceil(cleanText.length / 4);
+
+      await supabase.from('usage_logs').insert({
+        user_id: session.user.id,
+        feature: `gemini_${action}`,
+        input_tokens: inputTokens,
+        output_tokens: outputTokens,
+        details: { environment: 'local' }
+      });
+    } catch (e) {
+      console.warn('Failed to log usage locally:', e);
+    }
+  }
+
   return JSON.parse(cleanText.trim());
 }
 
@@ -175,17 +196,19 @@ export const generateStudySet = async (
       ? `Listen to this audio and create a comprehensive study set with:
 - Title
 - Summary (max 50 words)
+- Detailed Notes (RAW HTML format): Return ONLY valid HTML. Use <h3> for section headers, <ul>/<ol> for lists, and <table class="w-full text-left border-collapse"> for classifications. DO NOT use markdown. Structure: Definition, Epidemiology, Classification (Table), Risk Factors, Pathophysiology, Clinical Features, Diagnosis, Management.
 - 5 Key Concepts
-- 8 Flashcards (short Q&A)
-- 6 Quiz Questions (multiple choice with 4 options each)
-- Mind Map with main topic and 3-4 branches`
+- Flashcards (short Q&A): Create 5-15 flashcards depending on the content capability.
+- Quiz Questions (multiple choice): Create 3-10 questions depending on the content capability.
+- Mind Map: Create a mind map with the main topic and sufficient branches to cover the key areas (minimum 3).`
       : `Read this document and create a comprehensive study set with:
 - Title
 - Summary (max 50 words)
+- Detailed Notes (RAW HTML format): Return ONLY valid HTML. Use <h3> for section headers, <ul>/<ol> for lists, and <table class="w-full text-left border-collapse"> for classifications. DO NOT use markdown. Structure: Definition, Epidemiology, Classification (Table), Risk Factors, Pathophysiology, Clinical Features, Diagnosis, Management.
 - 5 Key Concepts
-- 8 Flashcards (short Q&A)
-- 6 Quiz Questions (multiple choice with 4 options each)
-- Mind Map with main topic and 3-4 branches`;
+- Flashcards (short Q&A): Create 5-15 flashcards depending on the content capability.
+- Quiz Questions (multiple choice): Create 3-10 questions depending on the content capability.
+- Mind Map: Create a mind map with the main topic and sufficient branches to cover the key areas (minimum 3).`;
   } else if (inputType === 'youtube') {
     const videoIdMatch = content.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
     const videoId = videoIdMatch ? videoIdMatch[1] : null;
@@ -222,30 +245,33 @@ ${truncatedTranscript}
 Create:
 - Title
 - Summary (max 50 words)
+- Detailed Notes (RAW HTML format): Return ONLY valid HTML. Use <h3> for headers, <ul>/<ol> for lists, and <table class="w-full text-left border-collapse">. DO NOT use markdown. Include sections like Definition, History, Key Players, Timeline, Impact, etc.
 - 5 Key Concepts (max 10 words each)
-- 8 Flashcards (short Q&A)
-- 6 Quiz Questions (multiple choice with 4 options each)
-- Mind Map with main topic and 3-4 branches`;
+- Flashcards (short Q&A): Create 5-15 flashcards depending on the content capability.
+- Quiz Questions (multiple choice): Create 3-10 questions depending on the content capability.
+- Mind Map: Create a mind map with the main topic and sufficient branches to cover the key areas (minimum 3).`;
     } else {
       userPrompt = `I want to learn about the topic from this YouTube video: https://www.youtube.com/watch?v=${videoId || 'unknown'}
 
 Please create a comprehensive study set based on what you know about this topic. Include:
 - Title
 - Summary (max 50 words)
+- Detailed Notes (RAW HTML format): Return ONLY valid HTML. Use <h3> for headers, <ul>/<ol> for lists, and <table class="w-full text-left border-collapse">. DO NOT use markdown.
 - 5 Key Concepts
-- 8 Flashcards
-- 6 Quiz Questions (multiple choice with 4 options each)
-- Mind Map with main topic and 3-4 branches`;
+- Flashcards: Create 5-15 flashcards depending on the content capability.
+- Quiz Questions: Create 3-10 questions depending on the content capability.
+- Mind Map: Create a mind map with the main topic and sufficient branches to cover the key areas (minimum 3).`;
     }
   } else {
     // TEXT
     userPrompt = `Analyze the following text and create a comprehensive study set. Include:
 - Title
 - Summary (max 50 words)
+- Detailed Notes (RAW HTML format): Return ONLY valid HTML. Use <h3> for section headers, <ul>/<ol> for lists, and <table class="w-full text-left border-collapse"> for classifications. DO NOT use markdown. Structure: Definition, Epidemiology, Classification (Table), Risk Factors, Pathophysiology, Clinical Features, Diagnosis, Management.
 - 5 Key Concepts
-- 8 Flashcards (short Q&A pairs)
-- 6 Quiz Questions (multiple choice with 4 options each)
-- Mind Map with main topic and 3-4 branches
+- Flashcards (short Q&A pairs): Create 5-15 flashcards depending on the content capability.
+- Quiz Questions (multiple choice): Create 3-10 questions depending on the content capability.
+- Mind Map: Create a mind map with the main topic and sufficient branches to cover the key areas (minimum 3).
 
 TEXT:
 ${content.substring(0, 15000)}`;
