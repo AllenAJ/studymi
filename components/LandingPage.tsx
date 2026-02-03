@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, ChevronDown, Globe, Shield, Zap, X, Volume2, Mic, FileText, Layers } from 'lucide-react';
 
+import { usePostHog } from 'posthog-js/react';
+
 interface LandingPageProps {
   onStart: () => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
+  const posthog = usePostHog();
+
+  React.useEffect(() => {
+    if (posthog) posthog.capture('landing_page_viewed');
+  }, [posthog]);
+
   // SEO-optimized wording
   const H1_SUBTITLE = "The AI Note Taking App that turns 'huh?' into 'ohhh, got it.'";
   const [openFaq, setOpenFaq] = useState<number | null>(null);

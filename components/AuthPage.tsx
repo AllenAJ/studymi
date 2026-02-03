@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
 import { signIn, signUp, signInWithGoogle } from '../services/supabase';
+import { DISPOSABLE_DOMAINS } from '../utils/disposableDomains';
 
 interface AuthPageProps {
   onComplete: (userId: string, email: string) => void;
@@ -18,12 +19,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onComplete, onBack }) => {
   const [honeyPot, setHoneyPot] = useState('');
   const [lastAttemptTime, setLastAttemptTime] = useState(0);
   const [attemptCount, setAttemptCount] = useState(0);
-
-  // Common disposable email domains
-  const DISPOSABLE_DOMAINS = [
-    'yopmail.com', 'temp-mail.org', 'guerrillamail.com', '10minutemail.com',
-    'sharklasers.com', 'mailinator.com', 'tempmail.com', 'throwawaymail.com'
-  ];
 
   const validateEmail = (email: string) => {
     const domain = email.split('@')[1];
@@ -152,8 +147,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onComplete, onBack }) => {
 
         {error && (
           <div className={`mb-6 p-4 rounded-none text-sm font-medium ${error.includes('Check your email')
-              ? 'bg-green-50 text-green-700 border border-green-200'
-              : 'bg-red-50 text-red-700 border border-red-200'
+            ? 'bg-green-50 text-green-700 border border-green-200'
+            : 'bg-red-50 text-red-700 border border-red-200'
             }`}>
             {error}
           </div>

@@ -17,6 +17,7 @@
     "dotenv": "^17.2.3",
     "lucide-react": "^0.556.0",
     "openai": "^6.10.0",
+    "posthog-js": "^1.305.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
   },
