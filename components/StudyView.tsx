@@ -5,6 +5,7 @@ import { QuizView } from './QuizView';
 import { MindMapView } from './MindMapView';
 import { TeachBackView } from './TeachBackView';
 import { ArrowLeft, BookOpen, BrainCircuit, Layers, CheckCircle, GraduationCap, Menu, X, Moon, Sun } from 'lucide-react';
+import { getVibeString } from '../services/genZUtils';
 
 interface StudyViewProps {
   studySet: StudySet;
@@ -44,14 +45,19 @@ export const StudyView: React.FC<StudyViewProps> = ({ studySet, onBack }) => {
 
   React.useEffect(() => {
     localStorage.setItem('studymi_genZMode', JSON.stringify(isGenZMode));
+    if (isGenZMode) {
+      document.documentElement.classList.add('genz-mode');
+    } else {
+      document.documentElement.classList.remove('genz-mode');
+    }
   }, [isGenZMode]);
 
   const tabs = [
-    { id: 'summary', label: 'Summary', icon: BookOpen },
-    { id: 'flashcards', label: 'Flashcards', icon: Layers },
-    { id: 'quiz', label: 'Quiz', icon: CheckCircle },
-    { id: 'mindmap', label: 'Mind Map', icon: BrainCircuit },
-    { id: 'teach', label: 'Teach Back', icon: GraduationCap },
+    { id: 'summary', label: getVibeString(isGenZMode, 'summary'), icon: BookOpen },
+    { id: 'flashcards', label: getVibeString(isGenZMode, 'flashcards'), icon: Layers },
+    { id: 'quiz', label: getVibeString(isGenZMode, 'quiz'), icon: CheckCircle },
+    { id: 'mindmap', label: getVibeString(isGenZMode, 'mindmap'), icon: BrainCircuit },
+    { id: 'teach', label: getVibeString(isGenZMode, 'teachback'), icon: GraduationCap },
   ];
 
   const SidebarContent = () => (
@@ -73,7 +79,7 @@ export const StudyView: React.FC<StudyViewProps> = ({ studySet, onBack }) => {
               className={`flex lg:flex-col items-center gap-4 lg:gap-2 justify-start lg:justify-center p-3 lg:p-4 rounded-none transition-all duration-200 ${isActive ? 'bg-black/5 dark:bg-white/10 text-deepNavy dark:text-white font-bold' : 'text-steelGray dark:text-darkMuted hover:bg-white dark:hover:bg-darkBorder hover:text-deepNavy dark:hover:text-white'}`}
             >
               <tab.icon className={`w-5 h-5 lg:w-6 lg:h-6 ${isActive ? 'stroke-2' : 'stroke-[1.5]'}`} />
-              <span className="text-sm lg:text-[10px] lg:uppercase lg:tracking-wide lg:mt-2">{tab.label}</span>
+              <span className={`text-sm lg:text-[10px] lg:uppercase lg:tracking-wide lg:mt-2 ${isGenZMode ? 'lowercase' : ''}`}>{tab.label}</span>
             </button>
           );
         })}
@@ -82,7 +88,16 @@ export const StudyView: React.FC<StudyViewProps> = ({ studySet, onBack }) => {
   );
 
   return (
-    <div className="min-h-screen bg-iceGray dark:bg-darkBg font-sans flex text-deepNavy dark:text-darkText overflow-hidden transition-colors duration-300">
+    <div className={`min-h-screen bg-iceGray dark:bg-darkBg font-sans flex text-deepNavy dark:text-darkText overflow-hidden transition-colors duration-300 ${isGenZMode ? 'genz-mode' : ''}`}>
+      {/* Decorative Sparkles for Gen Z Mode */}
+      {isGenZMode && (
+        <div className="fixed inset-0 pointer-events-none z-10">
+          <div className="sparkle" style={{ top: '15%', left: '10%', animationDelay: '0s' }}></div>
+          <div className="sparkle" style={{ top: '25%', left: '85%', animationDelay: '0.5s' }}></div>
+          <div className="sparkle" style={{ top: '65%', left: '12%', animationDelay: '1s' }}></div>
+          <div className="sparkle" style={{ top: '80%', left: '92%', animationDelay: '0.2s' }}></div>
+        </div>
+      )}
 
       {/* Mobile Header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white dark:bg-darkCard border-b border-softBorder dark:border-darkBorder z-50 flex items-center justify-between px-4">
@@ -137,10 +152,10 @@ export const StudyView: React.FC<StudyViewProps> = ({ studySet, onBack }) => {
         <div className="max-w-6xl mx-auto animate-slide-up">
           {/* Header (Desktop) */}
           <div className="mb-10 hidden lg:block">
-            <div className="inline-flex items-center px-4 py-1.5 rounded-none bg-white dark:bg-darkCard border border-softBorder dark:border-darkBorder text-xs font-bold text-steelGray dark:text-darkMuted mb-6 uppercase tracking-widest shadow-sm">
-              study session
+            <div className={`inline-flex items-center px-4 py-1.5 rounded-none bg-white dark:bg-darkCard border border-softBorder dark:border-darkBorder text-xs font-bold text-steelGray dark:text-darkMuted mb-6 uppercase tracking-widest shadow-sm ${isGenZMode ? 'lowercase' : ''}`}>
+              {getVibeString(isGenZMode, 'study_session')}
             </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-deepNavy dark:text-white leading-tight tracking-tight">{studySet.title}</h1>
+            <h1 className={`text-4xl md:text-5xl font-extrabold text-deepNavy dark:text-white leading-tight tracking-tight ${isGenZMode ? 'lowercase' : ''}`}>{studySet.title}</h1>
           </div>
 
           {/* Content Area */}
@@ -148,9 +163,9 @@ export const StudyView: React.FC<StudyViewProps> = ({ studySet, onBack }) => {
             {activeTab === 'summary' && (
               <div className="flex flex-col gap-8">
                 <div className="bg-deepNavy dark:bg-darkCard rounded-none p-8 md:p-10 text-white shadow-xl border border-transparent dark:border-darkBorder">
-                  <h3 className="font-bold text-xl mb-8 flex items-center gap-3">
+                  <h3 className={`font-bold text-xl mb-8 flex items-center gap-3 ${isGenZMode ? 'lowercase' : ''}`}>
                     <div className="w-2 h-2 rounded-none bg-accentYellow"></div>
-                    Key Concepts
+                    {getVibeString(isGenZMode, 'key_concepts')}
                   </h3>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {studySet.keyConcepts.map((concept, i) => (
@@ -163,9 +178,9 @@ export const StudyView: React.FC<StudyViewProps> = ({ studySet, onBack }) => {
                 </div>
 
                 <div className="bg-white dark:bg-darkCard rounded-none p-8 md:p-10 border border-softBorder dark:border-darkBorder shadow-soft">
-                  <h2 className="text-2xl font-bold mb-8 flex items-center gap-3 dark:text-white text-deepNavy">
+                  <h2 className={`text-2xl font-bold mb-8 flex items-center gap-3 dark:text-white text-deepNavy ${isGenZMode ? 'lowercase' : ''}`}>
                     <BookOpen className="w-6 h-6 text-primaryGold fill-primaryGold/20" />
-                    The Breakdown
+                    {getVibeString(isGenZMode, 'breakdown')}
                   </h2>
                   <div className="prose prose-lg text-deepNavy/80 dark:text-gray-300 leading-relaxed max-w-none prose-headings:text-deepNavy dark:prose-headings:text-white prose-strong:text-deepNavy dark:prose-strong:text-white prose-table:border-collapse prose-th:bg-black/5 dark:prose-th:bg-white/10 prose-th:p-3 prose-td:p-3 prose-td:border prose-td:border-softBorder dark:prose-td:border-darkBorder">
                     {studySet.detailedNotes ? (

@@ -3,6 +3,7 @@ import { Mic, FileText, Sparkles, Clock, ThumbsUp, Home, ArrowRight, X, Star, Se
 import { InputType, StudySet } from '../types';
 import { supabase } from '../services/supabase';
 import { usePostHog } from 'posthog-js/react';
+import { getVibeString } from '../services/genZUtils';
 
 // Free tier limit
 // Free tier limit
@@ -112,7 +113,9 @@ const StatsCard: React.FC<{ history: StudySet[] }> = ({ history }) => {
         </div>
         <div>
           <p className="text-3xl font-extrabold text-deepNavy dark:text-white mb-1">{totalSets}</p>
-          <p className="text-sm text-steelGray dark:text-darkMuted font-medium">study sets created</p>
+          <p className={`text-sm text-steelGray dark:text-darkMuted font-medium ${history.length > 0 && localStorage.getItem('studymi_genZMode') === 'true' ? 'lowercase' : ''}`}>
+            {getVibeString(localStorage.getItem('studymi_genZMode') === 'true', 'sets_created')}
+          </p>
         </div>
       </div>
 
@@ -125,7 +128,9 @@ const StatsCard: React.FC<{ history: StudySet[] }> = ({ history }) => {
         </div>
         <div>
           <p className="text-3xl font-extrabold text-deepNavy dark:text-white mb-1">{totalFlashcards}</p>
-          <p className="text-sm text-steelGray dark:text-darkMuted font-medium">flashcards generated</p>
+          <p className={`text-sm text-steelGray dark:text-darkMuted font-medium ${localStorage.getItem('studymi_genZMode') === 'true' ? 'lowercase' : ''}`}>
+            {getVibeString(localStorage.getItem('studymi_genZMode') === 'true', 'flashcards_generated')}
+          </p>
         </div>
       </div>
 
@@ -138,7 +143,9 @@ const StatsCard: React.FC<{ history: StudySet[] }> = ({ history }) => {
         </div>
         <div>
           <p className="text-3xl font-extrabold text-deepNavy dark:text-white mb-1">{totalQuizQuestions}</p>
-          <p className="text-sm text-steelGray dark:text-darkMuted font-medium">quiz questions</p>
+          <p className={`text-sm text-steelGray dark:text-darkMuted font-medium ${localStorage.getItem('studymi_genZMode') === 'true' ? 'lowercase' : ''}`}>
+            {getVibeString(localStorage.getItem('studymi_genZMode') === 'true', 'quiz_questions')}
+          </p>
         </div>
       </div>
     </div>
@@ -282,6 +289,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
     }
   }, [isDarkMode]);
 
+  // Gen Z Mode Logic
+  useEffect(() => {
+    if (isGenZMode) {
+      document.documentElement.classList.add('genz-mode');
+    } else {
+      document.documentElement.classList.remove('genz-mode');
+    }
+  }, [isGenZMode]);
+
   // Loading Animation Logic
   useEffect(() => {
     let interval: any;
@@ -322,13 +338,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
   }, [isProcessing]);
 
   const loadingSteps = [
-    "Reading your content...",
-    "Identifying key concepts...",
-    "Creating flashcards...",
-    "Generating quiz questions...",
-    "Building mind map...",
-    "Saving your study set...",
-    "All done! ✨"
+    getVibeString(isGenZMode, "loading_1"),
+    getVibeString(isGenZMode, "loading_2"),
+    getVibeString(isGenZMode, "loading_3"),
+    getVibeString(isGenZMode, "loading_4"),
+    getVibeString(isGenZMode, "loading_5"),
+    getVibeString(isGenZMode, "loading_6"),
+    getVibeString(isGenZMode, "loading_7")
   ];
 
   const tips = [
@@ -603,7 +619,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-iceGray dark:bg-darkBg font-sans flex text-deepNavy dark:text-darkText relative overflow-hidden transition-colors duration-300">
+    <div className={`min-h-screen bg-iceGray dark:bg-darkBg font-sans flex text-deepNavy dark:text-darkText relative overflow-hidden transition-colors duration-300 ${isGenZMode ? 'genz-mode' : ''}`}>
+      {/* Decorative Sparkles for Gen Z Mode */}
+      {isGenZMode && (
+        <div className="fixed inset-0 pointer-events-none z-10">
+          <div className="sparkle" style={{ top: '10%', left: '5%', animationDelay: '0s' }}></div>
+          <div className="sparkle" style={{ top: '20%', left: '80%', animationDelay: '0.5s' }}></div>
+          <div className="sparkle" style={{ top: '70%', left: '15%', animationDelay: '1s' }}></div>
+          <div className="sparkle" style={{ top: '85%', left: '90%', animationDelay: '0.2s' }}></div>
+          <div className="sparkle" style={{ top: '40%', left: '45%', animationDelay: '0.7s', opacity: 0.3 }}></div>
+        </div>
+      )}
 
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex fixed left-0 top-0 h-full w-24 bg-white dark:bg-darkBg border-r border-softBorder dark:border-darkBorder flex-col items-center py-8 z-50 shadow-soft">
@@ -695,7 +721,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {activeTab === 'home' && (
           <div className="w-full max-w-5xl mx-auto animate-slide-up pb-10">
             <div className="mb-12 hidden lg:block">
-              <h1 className="text-4xl font-extrabold mb-3 tracking-tight text-deepNavy dark:text-white">what's up, {user?.user_metadata?.full_name?.split(' ')[0] || 'Friend'}?</h1>
+              <h1 className={`text-4xl font-extrabold mb-3 tracking-tight text-deepNavy dark:text-white ${isGenZMode ? 'lowercase' : ''}`}>
+                {getVibeString(isGenZMode, "whats_up")}, {user?.user_metadata?.full_name?.split(' ')[0] || 'Friend'}?
+              </h1>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
@@ -722,8 +750,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             <div className="w-full">
-              <h2 className="text-xl font-bold mb-6 flex items-center gap-2 dark:text-white">
-                <Clock className="w-5 h-5 text-primaryGold" /> recent vibes
+              <h2 className={`text-xl font-bold mb-6 flex items-center gap-2 dark:text-white ${isGenZMode ? 'lowercase' : ''}`}>
+                <Clock className="w-5 h-5 text-primaryGold" /> {getVibeString(isGenZMode, "recent")}
               </h2>
               {history.length > 0 ? (
                 <div className="grid grid-cols-1 gap-4">

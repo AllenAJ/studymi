@@ -1,14 +1,39 @@
-import React from 'react';
-import { PopupButton } from '@typeform/embed-react';
-import { ArrowRight, Sparkles, Check, Mic, Globe, FileText, Layers } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { ArrowRight, Sparkles, Check, Mic, Globe, FileText, Layers, X } from 'lucide-react';
+
+// Declare Tally on window
+declare global {
+    interface Window {
+        Tally: any;
+    }
+}
 
 export const WaitlistPage: React.FC = () => {
-    // Capture UTM params to pass to Typeform
-    const params = new URLSearchParams(window.location.search);
-    const hiddenFields = {
-        utm_source: params.get('utm_source') || '',
-        utm_medium: params.get('utm_medium') || '',
-        utm_campaign: params.get('utm_campaign') || '',
+
+    useEffect(() => {
+        // Load Tally embed script
+        const script = document.createElement('script');
+        script.src = "https://tally.so/widgets/embed.js";
+        script.async = true;
+        document.body.appendChild(script);
+
+        return () => {
+            document.body.removeChild(script);
+        }
+    }, []);
+
+    const openWaitlist = () => {
+        if (window.Tally) {
+            window.Tally.openPopup('EkKeDA', {
+                layout: 'modal',
+                width: 700,
+                autoClose: 0,
+                emoji: {
+                    text: '👋',
+                    animation: 'wave'
+                }
+            });
+        }
     };
 
     return (
@@ -42,13 +67,12 @@ export const WaitlistPage: React.FC = () => {
                     </p>
 
                     <div className="flex justify-center mt-12 mb-20 relative z-20">
-                        <PopupButton
-                            id="PJTCG1ll"
-                            hidden={hiddenFields}
+                        <button
+                            onClick={openWaitlist}
                             className="px-8 py-4 bg-primaryGold text-deepNavy font-bold hover:bg-yellow-400 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-[200px] text-lg rounded-none shadow-lg hover:shadow-primaryGold/20"
                         >
                             Join Waitlist <ArrowRight className="w-5 h-5" />
-                        </PopupButton>
+                        </button>
                     </div>
 
                     {/* Demo Video */}

@@ -12,7 +12,7 @@
   <link rel="canonical" href="https://studymi.xyz" />
   <meta name="theme-color" content="#FFE44D" />
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://va.vercel-scripts.com https://*.posthog.com https://*.i.posthog.com https://embed.typeform.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*.googleusercontent.com https://img.youtube.com https://images.typeform.com; connect-src 'self' https://*.supabase.co https://generativelanguage.googleapis.com https://vitals.vercel-insights.com https://*.posthog.com https://*.i.posthog.com; media-src 'self' blob: data:; frame-src 'self' https://form.typeform.com https://*.typeform.com;">
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://va.vercel-scripts.com https://*.posthog.com https://*.i.posthog.com https://tally.so; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*.googleusercontent.com https://img.youtube.com; connect-src 'self' https://*.supabase.co https://generativelanguage.googleapis.com https://vitals.vercel-insights.com https://*.posthog.com https://*.i.posthog.com; media-src 'self' blob: data:; frame-src 'self' https://tally.so;">
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -156,6 +156,38 @@
 
     .dark .glass-backdrop {
       background: rgba(13, 13, 13, 0.85);
+    }
+
+    /* Gen Z Mode Enhancements */
+    .genz-mode .lowercase {
+      text-transform: lowercase !important;
+    }
+
+    @keyframes sparkle {
+      0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 0;
+      }
+
+      50% {
+        transform: scale(1.2) rotate(180deg);
+        opacity: 1;
+      }
+
+      100% {
+        transform: scale(0) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    .sparkle {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: #F59E0B;
+      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+      animation: sparkle 1.5s ease-in-out infinite;
+      pointer-events: none;
     }
   </style>
   <script type="module" src="/index.tsx"></script>
