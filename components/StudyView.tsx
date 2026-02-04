@@ -87,6 +87,24 @@ export const StudyView: React.FC<StudyViewProps> = ({ studySet, onBack }) => {
     </>
   );
 
+  const MobileBottomNav = () => (
+    <div className="lg:hidden fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] left-2 right-2 h-16 bg-white/90 dark:bg-darkCard/90 backdrop-blur-xl border border-softBorder dark:border-darkBorder rounded-2xl shadow-2xl flex items-center justify-between px-1 z-[60]">
+      {tabs.map((tab) => {
+        const isActive = activeTab === tab.id;
+        return (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all flex-1 min-w-0 ${isActive ? 'text-primaryGold' : 'text-steelGray dark:text-darkMuted'}`}
+          >
+            <tab.icon className="w-6 h-6 stroke-2" />
+            <span className={`text-[8px] font-extrabold mt-1 uppercase tracking-tighter text-center ${isGenZMode ? 'lowercase' : ''}`}>{tab.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+
   return (
     <div className={`min-h-screen bg-iceGray dark:bg-darkBg font-sans flex text-deepNavy dark:text-darkText overflow-hidden transition-colors duration-300 ${isGenZMode ? 'genz-mode' : ''}`}>
       {/* Decorative Sparkles for Gen Z Mode */}
@@ -99,16 +117,19 @@ export const StudyView: React.FC<StudyViewProps> = ({ studySet, onBack }) => {
         </div>
       )}
 
-      {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white dark:bg-darkCard border-b border-softBorder dark:border-darkBorder z-50 flex items-center justify-between px-4">
-        <button onClick={onBack} className="p-2 -ml-2">
-          <ArrowLeft className="w-6 h-6 text-deepNavy dark:text-white" />
+      {/* Mobile Top Actions (Slimmed Down) */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 p-4 flex items-center justify-between z-40 safe-top pointer-events-none">
+        <button
+          onClick={onBack}
+          className="p-3 bg-white/80 dark:bg-darkCard/80 backdrop-blur-md rounded-none border border-softBorder dark:border-darkBorder shadow-lg text-deepNavy dark:text-white pointer-events-auto active:scale-95 transition-all"
+        >
+          <ArrowLeft className="w-6 h-6" />
         </button>
-        <span className="font-bold text-sm text-deepNavy dark:text-white truncate max-w-[200px]">{studySet.title}</span>
-        <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 -mr-2">
-          <Menu className="w-6 h-6 text-deepNavy dark:text-white" />
-        </button>
-      </header>
+        <div className="px-4 py-2 bg-white/80 dark:bg-darkCard/80 backdrop-blur-md rounded-none border border-softBorder dark:border-darkBorder shadow-sm text-xs font-bold text-deepNavy dark:text-white truncate max-w-[150px]">
+          {studySet.title}
+        </div>
+        <div className="w-12"></div> {/* Spacer for symmetry */}
+      </div>
 
       {/* Sidebar Navigation (Desktop) */}
       <aside className="hidden lg:flex fixed left-0 top-0 h-full w-24 bg-white dark:bg-darkBg border-r border-softBorder dark:border-darkBorder flex-col items-center py-8 z-50 shadow-soft">
@@ -128,7 +149,8 @@ export const StudyView: React.FC<StudyViewProps> = ({ studySet, onBack }) => {
         </div>
       )}
 
-      <main className="flex-1 lg:ml-24 pt-20 lg:pt-6 p-4 md:p-12 min-h-screen overflow-y-auto">
+      <main className="flex-1 lg:ml-24 pt-20 lg:pt-6 p-4 md:p-12 min-h-screen overflow-y-auto pb-32">
+        <MobileBottomNav />
 
         {/* Top Controls inside Main View */}
         <div className="flex justify-end gap-3 mb-6">
