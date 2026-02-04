@@ -97,7 +97,36 @@ export const getProfile = async (userId: string) => {
 
         if (error) return null;
         return data;
+        return data;
     } catch {
         return null;
+    }
+};
+
+export const getMonthlyGenerationCount = async (userId: string): Promise<number> => {
+    try {
+        const client = getSupabase();
+        if (!client) return 0;
+
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        const { count, error } = await client
+            .from('usage_logs')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', userId)
+            .eq('feature', 'gemini_generateStudySet')
+            .gte('created_at', startOfMonth.toISOString());
+
+        if (error) {
+            console.warn('Error counting generations:', error);
+            return 0;
+        }
+
+        return count || 0;
+    } catch (err) {
+        console.warn('Error counting generations:', err);
+        return 0;
     }
 };

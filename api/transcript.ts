@@ -1,7 +1,7 @@
 import https from 'https';
-import { getUser } from './_utils/auth';
-import { rateLimit } from './_utils/rate-limit';
-import { logUsage, checkUsageLimit, getProfile } from './_utils/db';
+import { getUser } from './_utils/auth.js';
+import { rateLimit } from './_utils/rate-limit.js';
+import { logUsage, checkUsageLimit, getProfile } from './_utils/db.js';
 
 export const config = {
   runtime: 'nodejs',
@@ -199,48 +199,53 @@ export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  const videoIdParam = req.query.v || req.query.videoId;
-
-  if (!videoIdParam) {
-    return res.status(400).json({ error: 'Missing video ID', transcript: '', success: false });
-  }
-
-  // Security Check
-  const user = await getUser(req);
-  if (!user) {
-    return res.status(401).json({ error: 'Unauthorized: Please log in' });
-  }
-
-  // Rate Limit
-  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-  const identifier = user.id || ip;
-
-  if (!rateLimit(identifier, 20, 60000)) { // 20 requests per minute (higher for fetch)
-    return res.status(429).json({ error: 'Too many requests' });
-  }
-
-  // Monthly Quota Check
-  if (user.id) {
-    const profile = await getProfile(user.id);
-    const limit = profile?.is_premium ? 50000000 : 2000000;
-
-    if (!(await checkUsageLimit(user.id, limit))) {
-      return res.status(403).json({ error: 'Monthly usage limit exceeded.' });
-    }
-  }
-
-  const videoId = extractVideoId(videoIdParam) || videoIdParam;
-
-  // Strict Validation for ID (11 chars alphanumeric)
-  if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
-    return res.status(400).json({ error: 'Invalid video ID format' });
-  }
-
   try {
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+
+    const videoIdParam = req.query.v || req.query.videoId;
+
+    if (!videoIdParam) {
+      return res.status(400).json({ error: 'Missing video ID', transcript: '', success: false });
+    }
+
+    // Security Check
+    const user = await getUser(req);
+    if (!user) {
+      return res.status(401).json({ error: 'Unauthorized: Please log in' });
+    }
+
+    // Rate Limit
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const identifier = user.id || ip;
+
+    if (!rateLimit(identifier, 20, 60000)) { // 20 requests per minute (higher for fetch)
+      return res.status(429).json({ error: 'Too many requests' });
+    }
+
+    // Monthly Quota Check
+    if (user.id) {
+      // Safe getProfile check
+      try {
+        const profile = await getProfile(user.id);
+        const limit = profile?.is_premium ? 50000000 : 2000000;
+        if (!(await checkUsageLimit(user.id, limit))) {
+          return res.status(403).json({ error: 'Monthly usage limit exceeded.' });
+        }
+      } catch (e) {
+        console.warn('Usage check failed:', e);
+        // Continue - fail open
+      }
+    }
+
+    const videoId = extractVideoId(videoIdParam) || videoIdParam;
+
+    // Strict Validation for ID (11 chars alphanumeric)
+    if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
+      return res.status(400).json({ error: 'Invalid video ID format' });
+    }
+
     console.log('Fetching transcript for:', videoId);
     const result = await getSubtitles(videoId, 'en');
     const transcript = result.lines.join(' ');
@@ -255,9 +260,9 @@ export default async function handler(req: any, res: any) {
       success: true
     });
   } catch (error: any) {
-    console.error('Transcript fetch error:', error.message);
+    console.error('Transcript fetch critical error:', error.message || error);
     return res.status(500).json({
-      error: error.message,
+      error: error.message || 'Internal Server Error',
       transcript: '',
       success: false
     });

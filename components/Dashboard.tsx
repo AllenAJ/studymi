@@ -167,15 +167,40 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [isRecording, setIsRecording] = useState(false);
 
   // Check if user has reached free tier limit
+  // Check if user has reached free tier limit
   const [hasReachedLimit, setHasReachedLimit] = useState(false);
   const [remainingFreeNotes, setRemainingFreeNotes] = useState(0);
 
+  // Fetch real usage from server
   useEffect(() => {
-    setHasReachedLimit(!isPremium && history.length >= FREE_TIER_LIMIT);
-    // Calc remaining
-    const remaining = Math.max(0, FREE_TIER_LIMIT - history.length);
-    setRemainingFreeNotes(isPremium ? 9999 : remaining);
-  }, [history, isPremium]);
+    const fetchUsage = async () => {
+      if (isPremium) {
+        setHasReachedLimit(false);
+        setRemainingFreeNotes(9999);
+        return;
+      }
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+        if (!token) return;
+
+        const res = await fetch('/api/usage', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setRemainingFreeNotes(data.remaining);
+          setHasReachedLimit(data.remaining <= 0);
+        }
+      } catch (e) {
+        console.error('Failed to fetch usage', e);
+      }
+    };
+
+    fetchUsage();
+    // Refresh when history changes (succesful generation)
+  }, [history.length, isPremium]);
 
   // Initialize settings from localStorage
   const [isGenZMode, setIsGenZMode] = useState(() => {

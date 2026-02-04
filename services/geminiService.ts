@@ -42,12 +42,22 @@ async function callGeminiServer(prompt: string, action: string, isGenZ: boolean,
     body: JSON.stringify({ action, prompt, isGenZ, inlineData })
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'API request failed');
+  let data;
+  try {
+    const text = await response.text();
+    try {
+      data = JSON.parse(text);
+    } catch {
+      console.error('API returned non-JSON:', text.substring(0, 100));
+      throw new Error(`Server error (${response.status})`);
+    }
+  } catch (e: any) {
+    throw new Error(e.message || 'Network response was not ok');
   }
 
-  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || 'API request failed');
+  }
   return data.result;
 }
 
@@ -219,16 +229,23 @@ export const generateStudySet = async (
       try {
         console.log('Fetching transcript for:', videoId);
         const response = await fetch(`/api/transcript/${videoId}`);
-        const data = await response.json();
-
-        if (data.success && data.transcript && data.transcript.length > 50) {
-          transcript = data.transcript
-            .replace(/&amp;/g, '&')
-            .replace(/&#39;/g, "'")
-            .replace(/&quot;/g, '"');
-          console.log('✅ Fetched YouTube transcript via server');
-        } else if (data.error) {
-          console.warn('⚠️ Transcript API error:', data.error);
+        if (response.ok) {
+          try {
+            const data = await response.json();
+            if (data.success && data.transcript && data.transcript.length > 50) {
+              transcript = data.transcript
+                .replace(/&amp;/g, '&')
+                .replace(/&#39;/g, "'")
+                .replace(/&quot;/g, '"');
+              console.log('✅ Fetched YouTube transcript via server');
+            } else if (data.error) {
+              console.warn('⚠️ Transcript API error:', data.error);
+            }
+          } catch (e) {
+            console.warn('⚠️ Transcript API returned invalid JSON');
+          }
+        } else {
+          console.warn('⚠️ Transcript API failed with status:', response.status);
         }
       } catch (error) {
         console.warn('⚠️ Could not fetch transcript:', error);
