@@ -469,7 +469,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         },
         body: JSON.stringify({
           plan: isYearlyPlan ? 'yearly' : 'monthly',
-          returnUrl: window.location.href,
+          returnUrl: window.location.origin + '/?status=success',
           customerEmail: user?.email,
           userId: user?.id,
           // Use user name or fall back to email part
@@ -719,7 +719,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <MobileBottomNav />
 
         {/* Top Controls Bar - No longer fixed on mobile */}
-        <div className="flex justify-between items-center mb-10 px-0 lg:px-0 safe-top">
+        <div className="flex justify-between items-center mb-10 px-0 lg:px-0" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <img src="/favicon-96x96.png" alt="Studymi" className="w-8 h-8 md:w-6 md:h-6" />
@@ -792,65 +792,68 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </h1>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+            {/* Main Actions Grid - Compact Mobile */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
               {[
-                { id: 'voice', icon: Mic, label: 'Voice', sub: 'Record audio' },
-                { id: 'text', icon: FileText, label: 'Text', sub: 'Paste notes' },
-                { id: 'upload', icon: Upload, label: 'Upload', sub: 'PDF / Audio' },
-                { id: 'link', icon: Youtube, label: 'YouTube', sub: 'Video summary' },
+                { id: 'voice', icon: Mic, label: 'Voice', sub: 'Record' },
+                { id: 'text', icon: FileText, label: 'Text', sub: 'Paste' },
+                { id: 'upload', icon: Upload, label: 'Upload', sub: 'PDF/Audio' },
+                { id: 'link', icon: Youtube, label: 'YouTube', sub: 'Video' },
               ].map((item) => (
                 <button
                   key={item.id}
                   onClick={() => setActiveModal(item.id as any)}
-                  className="bg-white dark:bg-darkCard rounded-none p-6 border border-softBorder dark:border-darkBorder hover:border-primaryGold dark:hover:border-primaryGold hover:shadow-hover transition-all group flex flex-col items-start gap-4"
+                  className="bg-white dark:bg-darkCard rounded-2xl p-4 border border-softBorder dark:border-darkBorder hover:border-primaryGold dark:hover:border-primaryGold hover:shadow-lg transition-all active:scale-95 group flex flex-col items-center text-center gap-3 aspect-square justify-center"
                 >
-                  <div className="w-10 h-10 shrink-0 bg-iceGray dark:bg-darkBorder rounded-none flex items-center justify-center text-deepNavy dark:text-white group-hover:bg-primaryGold group-hover:text-white transition-colors">
+                  <div className="w-12 h-12 bg-iceGray dark:bg-darkBorder rounded-full flex items-center justify-center text-deepNavy dark:text-white group-hover:bg-primaryGold group-hover:text-white transition-colors">
                     <item.icon className="w-6 h-6 stroke-2" />
                   </div>
-                  <div className="text-left">
-                    <h3 className="font-bold text-deepNavy dark:text-white">{item.label}</h3>
-                    <p className="text-xs text-steelGray dark:text-darkMuted">{item.sub}</p>
+                  <div>
+                    <h3 className="font-bold text-sm text-deepNavy dark:text-white">{item.label}</h3>
+                    <p className="text-[10px] text-steelGray dark:text-darkMuted uppercase tracking-wide font-medium mt-0.5">{item.sub}</p>
                   </div>
                 </button>
               ))}
             </div>
 
             <div className="w-full">
-              <h2 className={`text-xl font-bold mb-6 flex items-center gap-2 dark:text-white ${isGenZMode ? 'lowercase' : ''}`}>
-                <Clock className="w-5 h-5 text-primaryGold" /> {getVibeString(isGenZMode, "recent")}
+              <h2 className={`text-sm font-bold mb-4 flex items-center gap-2 text-steelGray dark:text-darkMuted uppercase tracking-wider ${isGenZMode ? 'lowercase' : ''}`}>
+                <Clock className="w-4 h-4" /> {getVibeString(isGenZMode, "recent")}
               </h2>
               {history.length > 0 ? (
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 gap-2.5">
                   {history.slice(0, 5).map((set) => (
                     <div
                       key={set.id}
-                      className="w-full bg-white dark:bg-darkCard p-6 rounded-none border border-softBorder dark:border-darkBorder hover:border-primaryGold dark:hover:border-white/20 transition-all flex items-center justify-between group shadow-sm hover:shadow-md"
+                      className="w-full bg-white dark:bg-darkCard p-4 rounded-xl border border-softBorder dark:border-darkBorder hover:border-primaryGold dark:hover:border-white/20 transition-all flex items-center justify-between group shadow-sm active:scale-[0.99]"
                     >
                       <button
                         onClick={() => onSelectHistory(set)}
-                        className="flex items-center gap-4 flex-1"
+                        className="flex items-center gap-4 flex-1 text-left min-w-0"
                       >
-                        <div className="w-10 h-10 shrink-0 rounded-none bg-iceGray dark:bg-darkBorder flex items-center justify-center text-deepNavy dark:text-white group-hover:bg-primaryGold group-hover:text-white transition-colors">
-                          {set.type === 'audio' ? <Mic className="w-6 h-6 stroke-2" /> :
-                            set.type === 'youtube' ? <Youtube className="w-6 h-6 stroke-2" /> :
-                              set.type === 'pdf' ? <Upload className="w-6 h-6 stroke-2" /> :
-                                <FileText className="w-6 h-6 stroke-2" />}
+                        <div className="w-10 h-10 shrink-0 rounded-full bg-iceGray dark:bg-darkBorder flex items-center justify-center text-deepNavy dark:text-white group-hover:bg-primaryGold group-hover:text-white transition-colors">
+                          {set.type === 'audio' ? <Mic className="w-5 h-5" /> :
+                            set.type === 'youtube' ? <Youtube className="w-5 h-5" /> :
+                              set.type === 'pdf' ? <Upload className="w-5 h-5" /> :
+                                <FileText className="w-5 h-5" />}
                         </div>
-                        <div className="text-left">
-                          <h3 className="font-bold text-base dark:text-white group-hover:text-primaryGold dark:group-hover:text-primaryGold transition-colors">{set.title}</h3>
-                          <p className="text-xs text-steelGray dark:text-darkMuted font-medium">{new Date(set.createdAt).toLocaleDateString()}</p>
+                        <div className="min-w-0">
+                          <h3 className="font-bold text-sm text-deepNavy dark:text-white truncate pr-2 group-hover:text-primaryGold dark:group-hover:text-primaryGold transition-colors">{set.title}</h3>
+                          <div className="flex items-center gap-2 text-[10px] text-steelGray dark:text-darkMuted font-medium uppercase tracking-wide">
+                            <span>{new Date(set.createdAt).toLocaleDateString()}</span>
+                          </div>
                         </div>
                       </button>
                       <div className="flex items-center gap-2">
                         {onDeleteStudySet && (
                           <button
                             onClick={(e) => { e.stopPropagation(); setStudySetToDelete(set.id); setActiveModal('confirmDelete'); }}
-                            className="p-2 rounded-none hover:bg-red-50 dark:hover:bg-red-900/10 text-steelGray hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                            className="p-1.5 rounded-full hover:bg-red-50 dark:hover:bg-red-900/10 text-steelGray hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
                           >
-                            <Trash2 className="w-6 h-6" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         )}
-                        <ArrowRight className="w-6 h-6 text-steelGray group-hover:text-primaryGold transition-colors" />
+                        <ArrowRight className="w-4 h-4 text-steelGray group-hover:text-primaryGold transition-colors" />
                       </div>
                     </div>
                   ))}

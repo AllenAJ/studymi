@@ -3,6 +3,7 @@ import { generateStudySet } from './services/geminiService';
 import { supabase, getProfile, upsertProfile, saveStudySet, getStudySets, deleteStudySet, deleteAllStudySets, submitFeedback } from './services/supabase';
 import { StudySet, InputType } from './types';
 import { LandingPage } from './components/LandingPage';
+import { NativeLanding } from './components/NativeLanding';
 import { AuthPage } from './components/AuthPage';
 import { Dashboard } from './components/Dashboard';
 import { StudyView } from './components/StudyView';
@@ -13,8 +14,10 @@ import { WaitlistPage } from './components/WaitlistPage';
 import { User } from '@supabase/supabase-js';
 import { usePostHog } from 'posthog-js/react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
+import { LoadingView } from './components/LoadingView';
+import { OfflineView } from './components/OfflineView';
 
-type ViewType = 'loading' | 'landing' | 'auth' | 'onboarding' | 'dashboard' | 'study' | 'privacy' | 'terms' | 'disclaimer' | 'refund' | 'pricing';
+type ViewType = 'loading' | 'landing' | 'native_landing' | 'auth' | 'onboarding' | 'dashboard' | 'study' | 'privacy' | 'terms' | 'disclaimer' | 'refund' | 'pricing';
 
 const App: React.FC = () => {
   const posthog = usePostHog();
@@ -49,6 +52,11 @@ const App: React.FC = () => {
     if (path === '/refund') return 'refund';
     if (path === '/pricing') return 'pricing';
     if (path === '/access') return 'auth';
+
+    // Check if running in Capacitor native app
+    const isNative = (window as any).Capacitor?.isNativePlatform?.() ?? false;
+    if (isNative) return 'native_landing';
+
     return 'loading';
   };
 
@@ -61,6 +69,8 @@ const App: React.FC = () => {
   const [currentSet, setCurrentSet] = useState<StudySet | null>(null);
   const [history, setHistory] = useState<StudySet[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Track page views
   useEffect(() => {
@@ -106,6 +116,88 @@ const App: React.FC = () => {
   // Track last authenticated user to prevent redundant loads/redirects
   const lastAuthUser = useRef<string | null>(null);
 
+  // Initialize Network and Splash Screen
+  useEffect(() => {
+    let mounted = true;
+
+    const initAppShell = async () => {
+      try {
+        const isNative = (window as any).Capacitor?.isNativePlatform?.() ?? false;
+
+        if (isNative) {
+          try {
+            const { Network } = await import('@capacitor/network');
+            const status = await Network.getStatus();
+            if (mounted) setIsOnline(status.connected);
+
+            Network.addListener('networkStatusChange', status => {
+              if (mounted) setIsOnline(status.connected);
+            });
+          } catch (e) {
+            console.warn('[App] Network plugin init failed:', e);
+          }
+        }
+
+        // Hide splash screen after initialization
+        setTimeout(async () => {
+          if (!mounted) return;
+
+          if (isNative) {
+            try {
+              const { SplashScreen } = await import('@capacitor/splash-screen');
+              await SplashScreen.hide();
+            } catch (e) {
+              console.warn('[App] SplashScreen hide failed:', e);
+            }
+          }
+          setIsInitialLoad(false);
+
+          // Safety fallback: if view is still 'loading' after 3 seconds, 
+          // force check auth again or go to landing
+          setTimeout(() => {
+            if (mounted && view === 'loading') {
+              console.warn('[App] Auth hang or slow load detected, forcing view update');
+              supabase.auth.getSession().then(({ data: { session } }) => {
+                if (session?.user) {
+                  loadUserData(session.user.id);
+                } else {
+                  const isNativeEnv = (window as any).Capacitor?.isNativePlatform?.() ?? false;
+                  setView(isNativeEnv ? 'native_landing' : 'landing');
+                }
+              });
+            }
+          }, 3000);
+        }, 800);
+      } catch (err) {
+        console.error('[App] Initialization error:', err);
+        if (mounted) {
+          setIsInitialLoad(false);
+          const isNativeEnv = (window as any).Capacitor?.isNativePlatform?.() ?? false;
+          if (view === 'loading') setView(isNativeEnv ? 'native_landing' : 'landing');
+        }
+      }
+    };
+
+    initAppShell();
+
+    // Universal Safety Timeout - 6 seconds max for loading screen
+    const safetyTimer = setTimeout(() => {
+      if (mounted && (isInitialLoad || view === 'loading')) {
+        console.warn('[App] Universal safety timeout reached');
+        setIsInitialLoad(false);
+        if (view === 'loading') {
+          const isNativeEnv = (window as any).Capacitor?.isNativePlatform?.() ?? false;
+          setView(isNativeEnv ? 'native_landing' : 'landing');
+        }
+      }
+    }, 6000);
+
+    return () => {
+      mounted = false;
+      clearTimeout(safetyTimer);
+    };
+  }, [view]);
+
   // Check auth state on mount
   useEffect(() => {
     // Skip auth redirect if on legal pages, pricing, or auth (admin access)
@@ -133,7 +225,8 @@ const App: React.FC = () => {
         }
       } else if (!isLegalPage) {
         // Only redirect to landing if not on a legal page
-        setView('landing');
+        const isNative = (window as any).Capacitor?.isNativePlatform?.() ?? false;
+        setView(isNative ? 'native_landing' : 'landing');
       }
     });
 
@@ -169,9 +262,66 @@ const App: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Handle deep links for OAuth callback (native app only)
+  useEffect(() => {
+    const setupDeepLinkListener = async () => {
+      const isNative = (window as any).Capacitor?.isNativePlatform?.() ?? false;
+      if (!isNative) return;
+
+      const { App } = await import('@capacitor/app');
+
+      // Handle deep links when app is opened via URL scheme
+      App.addListener('appUrlOpen', async (event) => {
+        console.log('[DeepLink] Received URL:', event.url);
+
+        // Check if this is an auth callback
+        if (event.url.includes('auth/callback') || event.url.includes('access_token')) {
+          // Extract the URL fragment (everything after #)
+          const urlFragment = event.url.split('#')[1];
+          if (urlFragment) {
+            // Parse the fragment as URL params
+            const params = new URLSearchParams(urlFragment);
+            const accessToken = params.get('access_token');
+            const refreshToken = params.get('refresh_token');
+
+            if (accessToken && refreshToken) {
+              console.log('[DeepLink] Setting session from tokens');
+              const { error } = await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken,
+              });
+
+              if (error) {
+                console.error('[DeepLink] Error setting session:', error);
+              } else {
+                console.log('[DeepLink] Session set successfully');
+                // Close the browser if it's still open
+                try {
+                  const { Browser } = await import('@capacitor/browser');
+                  await Browser.close();
+                } catch (e) {
+                  console.log('[DeepLink] Browser close skipped:', e);
+                }
+              }
+            }
+          }
+        }
+      });
+    };
+
+    setupDeepLinkListener();
+  }, []);
+
   const loadUserData = async (userId: string) => {
     // Load profile
-    const { data: profile } = await getProfile(userId);
+    const { data: profile, error } = await getProfile(userId);
+
+    if (error) {
+      console.error('Error loading profile:', error);
+      // Don't redirect to onboarding on error, stay on loading or show retry
+      alert('Failed to load user profile. Please check your connection.');
+      return;
+    }
 
     if (profile?.name) {
       setUserName(profile.name);
@@ -200,12 +350,23 @@ const App: React.FC = () => {
 
       setView('dashboard');
     } else {
-      // New user, needs onboarding
       setView('onboarding');
     }
   };
 
   const handleStart = () => setView('auth');
+
+  // Track successful checkout status from URL params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('status') === 'success') {
+      if (posthog) {
+        posthog.capture('checkout_success');
+      }
+      // Clean up URL to avoid redundant tracking or confusing the user
+      window.history.replaceState({}, '', window.location.origin);
+    }
+  }, [posthog]);
 
   const handleAuthComplete = async (userId: string, email: string) => {
     // Check if user has completed onboarding
@@ -355,16 +516,31 @@ const App: React.FC = () => {
   };
 
 
-  // Loading state
-  if (view === 'loading') {
+  // Handle Offline State
+  if (!isOnline) {
     return (
-      <div className="min-h-screen bg-iceGray dark:bg-darkBg flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-none bg-accentYellow animate-pulse"></div>
-          <p className="text-steelGray font-medium">Loading...</p>
-        </div>
-      </div>
+      <OfflineView
+        onRetry={async () => {
+          const isNative = (window as any).Capacitor?.isNativePlatform?.() ?? false;
+          if (isNative) {
+            try {
+              const { Network } = await import('@capacitor/network');
+              const status = await Network.getStatus();
+              setIsOnline(status.connected);
+            } catch (e) {
+              console.warn('[App] Manual network check failed:', e);
+            }
+          } else {
+            setIsOnline(navigator.onLine);
+          }
+        }}
+      />
     );
+  }
+
+  // Loading state
+  if (view === 'loading' || isInitialLoad) {
+    return <LoadingView />;
   }
 
   const MainContent = () => {
@@ -393,11 +569,12 @@ const App: React.FC = () => {
     if (view === 'disclaimer') return <LegalPage type="disclaimer" onBack={handleLegalBack} />;
     if (view === 'refund') return <LegalPage type="refund" onBack={handleLegalBack} />;
     if (view === 'pricing') return <PricingPage onBack={handleLegalBack} />;
+    if (view === 'native_landing') return <NativeLanding onStart={() => setView('auth')} />;
     return <LandingPage onStart={() => setView('auth')} />;
   };
 
   return (
-    <div className="min-h-screen bg-iceGray dark:bg-darkBg overflow-x-hidden">
+    <div className="h-full w-full bg-iceGray dark:bg-darkBg overflow-y-auto overflow-x-hidden relative scroll-smooth">
       {/* PWA Update Notification - Global */}
       {needRefresh && (
         <div className="fixed top-0 left-0 right-0 z-[10000] p-4 bg-primaryGold text-deepNavy flex items-center justify-between shadow-2xl animate-slide-down safe-top">

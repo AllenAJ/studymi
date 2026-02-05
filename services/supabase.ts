@@ -53,12 +53,28 @@ export const signIn = async (email: string, password: string) => {
 };
 
 export const signInWithGoogle = async () => {
+  // Detect if running in Capacitor native app
+  const isNative = (window as any).Capacitor?.isNativePlatform?.() ?? false;
+  
+  // Use custom URL scheme for native, window.location.origin for web
+  const redirectTo = isNative 
+    ? 'com.studymi.app://auth/callback'
+    : window.location.origin;
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: window.location.origin,
+      redirectTo,
+      skipBrowserRedirect: isNative, // Don't auto-redirect on native
     },
   });
+  
+  // On native, we need to open the URL in the system browser
+  if (isNative && data?.url) {
+    const { Browser } = await import('@capacitor/browser');
+    await Browser.open({ url: data.url });
+  }
+  
   return { data, error };
 };
 
