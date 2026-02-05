@@ -4,12 +4,13 @@ import { signIn, signUp, signInWithGoogle } from '../services/supabase';
 import { DISPOSABLE_DOMAINS } from '../utils/disposableDomains';
 
 interface AuthPageProps {
+  initialMode?: 'signin' | 'signup';
   onComplete: (userId: string, email: string) => void;
   onBack: () => void;
 }
 
-export const AuthPage: React.FC<AuthPageProps> = ({ onComplete, onBack }) => {
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
+export const AuthPage: React.FC<AuthPageProps> = ({ initialMode = 'signin', onComplete, onBack }) => {
+  const [mode, setMode] = useState<'signin' | 'signup'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -128,7 +129,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onComplete, onBack }) => {
     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 animate-fade-in relative">
       <button
         onClick={onBack}
-        className="absolute top-8 left-8 p-3 rounded-none hover:bg-iceGray transition-colors"
+        className="absolute left-8 p-3 rounded-none hover:bg-iceGray transition-colors"
+        style={{ top: 'calc(2rem + env(safe-area-inset-top))' }}
       >
         <ArrowLeft className="w-6 h-6 text-deepNavy" />
       </button>

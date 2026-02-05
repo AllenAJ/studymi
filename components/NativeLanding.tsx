@@ -1,145 +1,100 @@
 import React, { useState } from 'react';
-import { ArrowRight, Mic, BookOpen, Sparkles, Languages, Check, ChevronRight } from 'lucide-react';
+import { ArrowRight, Moon, Sun, Languages, ChevronRight } from 'lucide-react';
 
 interface NativeLandingProps {
-    onStart: () => void;
+    onStart: (mode: 'signin' | 'signup') => void;
 }
 
-const ONBOARDING_STEPS = [
-    {
-        id: 1,
-        question: "Never miss a word.",
-        subtext: "Record and transcribe your lectures in real-time. summarized instantly so you can actually pay attention.",
-        icon: <Mic className="w-16 h-16 text-primaryGold" />,
-        color: "bg-primaryGold/10",
-        image: "/vid/compressed/transcibe.mp4"
-    },
-    {
-        id: 2,
-        question: "Want to generate AI Summaries & Notes?",
-        subtext: "The AI note taking app that turns 'huh?' into 'ohhh, got it.' convert PDFs, videos, and audio into structured study material.",
-        icon: <Sparkles className="w-16 h-16 text-accentYellow" />,
-        color: "bg-accentYellow/10",
-        image: "/vid/compressed/insightshistory.mp4"
-    },
-    {
-        id: 3,
-        question: "Vibe with Gen Z Mode?",
-        subtext: "Learn in the language you actually speak. Because studying doesn't have to be mid.",
-        icon: <Languages className="w-16 h-16 text-deepNavy" />,
-        color: "bg-deepNavy/10",
-        image: "/vid/compressed/genz.mp4"
-    },
-    {
-        id: 4,
-        question: "Ready to crush your exams?",
-        subtext: "Anki-style flashcards, visual mindmaps, and practice quizzes generated in one tap.",
-        icon: <BookOpen className="w-16 h-16 text-accentYellow" />,
-        color: "bg-accentYellow/10",
-        image: "/vid/compressed/mindmap.mp4"
-    }
-];
-
 export const NativeLanding: React.FC<NativeLandingProps> = ({ onStart }) => {
-    const [currentStep, setCurrentStep] = useState(0);
-
-    const handleNext = () => {
-        if (currentStep < ONBOARDING_STEPS.length - 1) {
-            setCurrentStep(prev => prev + 1);
-        } else {
-            onStart();
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('studymi_darkMode');
+            return saved !== null ? JSON.parse(saved) : false;
         }
-    };
+        return false;
+    });
 
-    const step = ONBOARDING_STEPS[currentStep];
+    React.useEffect(() => {
+        localStorage.setItem('studymi_darkMode', JSON.stringify(isDarkMode));
+        if (isDarkMode) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }, [isDarkMode]);
 
     return (
-        <div className="min-h-full w-full bg-white flex flex-col items-center pb-safe">
-            {/* Dynamic Background */}
-            <div className={`absolute inset-0 opacity-5 transition-colors duration-1000 ${step.id % 2 === 0 ? 'bg-primaryGold' : 'bg-deepNavy'}`}></div>
+        <div className="min-h-screen w-full bg-iceGray dark:bg-darkBg flex flex-col relative overflow-hidden transition-colors duration-300">
+            {/* Background Dots */}
+            <div className="fixed inset-0 pointer-events-none z-0 opacity-40" style={{
+                backgroundImage: 'radial-gradient(#d1d5db 1px, transparent 1px)',
+                backgroundSize: '24px 24px'
+            }}></div>
 
-            {/* Progress Bar */}
-            <div className="w-full px-6 pt-6 flex gap-2 z-10">
-                {ONBOARDING_STEPS.map((_, index) => (
-                    <div
-                        key={index}
-                        className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${index <= currentStep ? 'bg-deepNavy shadow-sm' : 'bg-softBorder/40'
-                            }`}
-                    />
-                ))}
+            {/* Top Right Controls */}
+            <div className="absolute top-0 right-0 p-6 flex items-center gap-3 z-20" style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top))' }}>
+                <div className="flex items-center gap-2 bg-white/80 dark:bg-darkCard/80 backdrop-blur-md px-3 py-1.5 border border-softBorder dark:border-darkBorder shadow-sm">
+                    <span className="text-xs font-bold text-deepNavy dark:text-white flex items-center gap-2">
+                        <span className="text-lg">🇺🇸</span> EN
+                    </span>
+                </div>
+                <button
+                    onClick={() => setIsDarkMode(!isDarkMode)}
+                    className="w-10 h-10 bg-white/80 dark:bg-darkCard/80 backdrop-blur-md border border-softBorder dark:border-darkBorder flex items-center justify-center text-deepNavy dark:text-white shadow-sm"
+                >
+                    {isDarkMode ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+                </button>
             </div>
 
-            {/* Main Content Area */}
-            <div className="flex-1 w-full flex flex-col px-8 pt-12 pb-12 z-10">
-                {/* Badge */}
-                <div className="flex items-center gap-2 mb-8 animate-fade-in">
-                    <div className="px-3 py-1 bg-deepNavy text-white text-[10px] font-black uppercase tracking-[0.2em]">
-                        all the good stuff
-                    </div>
+            {/* Main Content */}
+            <div className="flex-1 flex flex-col items-center justify-center px-8 pt-24 pb-12 z-10 text-center">
+                {/* Mascot / Logo */}
+                <div className="relative mb-10 animate-float">
+                    <div className="absolute inset-0 bg-primaryGold/30 blur-[50px] rounded-full -z-10 animate-pulse-slow"></div>
+                    <img 
+                        src="/web-app-manifest-512x512.png" 
+                        alt="Studymi Mascot" 
+                        className="w-44 h-44 object-contain rounded-3xl drop-shadow-[0_20px_50px_rgba(245,158,11,0.3)]"
+                    />
                 </div>
 
-                {/* Question & Icon */}
-                <div className="flex flex-col gap-6 mb-12 animate-slide-up">
-                    <div className={`w-20 h-20 ${step.color} rounded-3xl flex items-center justify-center animate-bounce-subtle`}>
-                        {step.icon}
-                    </div>
-                    <h2 className="text-4xl font-extrabold text-deepNavy tracking-tighter leading-[0.95] lowercase">
-                        {step.question}
-                    </h2>
-                    <p className="text-steelGray text-lg font-medium leading-relaxed opacity-80">
-                        {step.subtext}
+                {/* Tagline */}
+                <div className="space-y-4">
+                    <h1 className="text-[40px] md:text-5xl font-extrabold text-deepNavy dark:text-white tracking-tight leading-[1.05] mb-2">
+                        Transform your notes <br />
+                        into your <span className="text-primaryGold drop-shadow-sm">AI Tutor</span>
+                    </h1>
+                    <p className="text-steelGray dark:text-darkMuted text-lg font-medium max-w-[300px] mx-auto leading-relaxed">
+                        Personalized study sets, flashcards, and quizzes in one tap.
                     </p>
-                </div>
-
-                {/* Visual Preview */}
-                <div className="flex-1 w-full relative mb-8 rounded-[2.5rem] overflow-hidden border border-softBorder shadow-2xl animate-scale-in">
-                    <video
-                        key={step.id}
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="absolute inset-0 w-full h-full object-cover"
-                    >
-                        <source src={step.image} type="video/mp4" />
-                    </video>
-                    {/* Soft overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-deepNavy/20 to-transparent"></div>
                 </div>
             </div>
 
             {/* Bottom Actions */}
-            <div className="w-full px-8 pb-12 z-10">
+            <div className="w-full px-8 pb-16 z-10 flex flex-col items-center gap-6 safe-bottom">
                 <button
-                    onClick={handleNext}
-                    className="w-full bg-deepNavy text-white py-6 rounded-[2rem] font-bold text-xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-deepNavy/20 group"
+                    onClick={() => onStart('signup')}
+                    className="w-full bg-deepNavy dark:bg-white text-white dark:text-deepNavy py-5 rounded-none font-bold text-lg flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-deepNavy/20 group"
                 >
-                    {currentStep === ONBOARDING_STEPS.length - 1 ? (
-                        <>start learning <Check className="w-6 h-6" /></>
-                    ) : (
-                        <>continue <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" /></>
-                    )}
+                    Get Started - it's free
+                    <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
 
-                <div className="flex justify-between items-center mt-8 px-2">
-                    <div className="flex items-center gap-2">
-                        <img src="/favicon-96x96.png" alt="Studymi" className="w-5 h-5 opacity-40" />
-                        <span className="text-[10px] font-bold text-steelGray/40 uppercase tracking-[0.2em]">studymi</span>
-                    </div>
-                    {currentStep < ONBOARDING_STEPS.length - 1 && (
-                        <button
-                            onClick={onStart}
-                            className="text-steelGray/60 font-bold text-[10px] uppercase tracking-[0.2em] hover:text-deepNavy transition-colors"
-                        >
-                            skip
-                        </button>
-                    )}
-                </div>
+                <button 
+                    onClick={() => onStart('signin')}
+                    className="text-steelGray dark:text-darkMuted font-medium text-sm transition-colors"
+                >
+                    Already purchased? <span className="text-deepNavy dark:text-white font-bold underline decoration-primaryGold/50 underline-offset-4">Sign In</span>
+                </button>
             </div>
 
-            {/* Decorative Blobs */}
-            <div className="fixed -bottom-40 -left-40 w-80 h-80 bg-accentYellow/5 rounded-full blur-[100px] -z-10"></div>
-            <div className="fixed top-20 -right-20 w-64 h-64 bg-primaryGold/5 rounded-full blur-[80px] -z-10"></div>
+            {/* Branded Footer Label */}
+            <div className="absolute bottom-6 left-0 right-0 flex justify-center opacity-30 pointer-events-none">
+                <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black tracking-[0.3em] uppercase text-deepNavy dark:text-white">studymi</span>
+                </div>
+            </div>
         </div>
     );
 };
+

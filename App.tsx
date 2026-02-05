@@ -61,6 +61,7 @@ const App: React.FC = () => {
   };
 
   const [view, setView] = useState<ViewType>(getInitialView());
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [user, setUser] = useState<User | null>(null);
   const [userName, setUserName] = useState('');
   const [userVibe, setUserVibe] = useState<'focused' | 'chill'>('focused');
@@ -92,7 +93,10 @@ const App: React.FC = () => {
       else if (path === '/' || path === '') {
         // Return to appropriate view based on auth state
         if (user) setView('dashboard');
-        else setView('landing');
+        else {
+          const isNative = (window as any).Capacitor?.isNativePlatform?.() ?? false;
+          setView(isNative ? 'native_landing' : 'landing');
+        }
       }
     };
 
@@ -110,7 +114,10 @@ const App: React.FC = () => {
   const handleLegalBack = () => {
     window.history.pushState({}, '', '/');
     if (user) setView('dashboard');
-    else setView('landing');
+    else {
+      const isNative = (window as any).Capacitor?.isNativePlatform?.() ?? false;
+      setView(isNative ? 'native_landing' : 'landing');
+    }
   };
 
   // Track last authenticated user to prevent redundant loads/redirects
@@ -254,7 +261,8 @@ const App: React.FC = () => {
         setUser(null);
         setUserName('');
         setHistory([]);
-        setView('landing');
+        const isNative = (window as any).Capacitor?.isNativePlatform?.() ?? false;
+        setView(isNative ? 'native_landing' : 'landing');
         if (posthog) posthog.reset();
       }
     });
@@ -354,7 +362,15 @@ const App: React.FC = () => {
     }
   };
 
-  const handleStart = () => setView('auth');
+  const handleStart = (mode: 'signin' | 'signup' = 'signin') => {
+    setAuthMode(mode);
+    setView('auth');
+  };
+
+  const handleAuthBack = () => {
+    const isNative = (window as any).Capacitor?.isNativePlatform?.() ?? false;
+    setView(isNative ? 'native_landing' : 'landing');
+  };
 
   // Track successful checkout status from URL params
   useEffect(() => {
@@ -480,7 +496,8 @@ const App: React.FC = () => {
     setUserName('');
     setCurrentSet(null);
     setHistory([]);
-    setView('landing');
+    const isNative = (window as any).Capacitor?.isNativePlatform?.() ?? false;
+    setView(isNative ? 'native_landing' : 'landing');
   };
 
   const handleDeleteStudySet = async (studySetId: string) => {
@@ -512,7 +529,8 @@ const App: React.FC = () => {
     setUserName('');
     setCurrentSet(null);
     setHistory([]);
-    setView('landing');
+    const isNative = (window as any).Capacitor?.isNativePlatform?.() ?? false;
+    setView(isNative ? 'native_landing' : 'landing');
   };
 
 
@@ -545,7 +563,7 @@ const App: React.FC = () => {
 
   const MainContent = () => {
     if (view === 'onboarding') return <Onboarding onComplete={handleOnboardingComplete} />;
-    if (view === 'auth') return <AuthPage onComplete={handleAuthComplete} onBack={() => setView('landing')} />;
+    if (view === 'auth') return <AuthPage initialMode={authMode} onComplete={handleAuthComplete} onBack={handleAuthBack} />;
     if (view === 'dashboard') return (
       <Dashboard
         user={user}
@@ -569,8 +587,8 @@ const App: React.FC = () => {
     if (view === 'disclaimer') return <LegalPage type="disclaimer" onBack={handleLegalBack} />;
     if (view === 'refund') return <LegalPage type="refund" onBack={handleLegalBack} />;
     if (view === 'pricing') return <PricingPage onBack={handleLegalBack} />;
-    if (view === 'native_landing') return <NativeLanding onStart={() => setView('auth')} />;
-    return <LandingPage onStart={() => setView('auth')} />;
+    if (view === 'native_landing') return <NativeLanding onStart={handleStart} />;
+    return <LandingPage onStart={() => handleStart('signup')} />;
   };
 
   return (

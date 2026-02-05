@@ -134,7 +134,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   return (
     <div className="min-h-screen bg-white flex flex-col font-sans text-deepNavy selection:bg-primaryGold selection:text-white">
       {/* Header with progress */}
-      <div className="w-full max-w-2xl mx-auto px-6 pt-8">
+      <div className="w-full max-w-2xl mx-auto px-6" style={{ paddingTop: 'calc(2rem + env(safe-area-inset-top))' }}>
         <div className="flex items-center gap-4">
           {step > 0 && (
             <button
@@ -160,22 +160,22 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           {/* Step 0: Welcome */}
           {step === 0 && (
             <div className="text-center animate-slide-up">
-              <div className="w-16 h-16 rounded-none bg-accentYellow mx-auto mb-10 shadow-lg shadow-yellow-200/50"></div>
+              <div className="relative w-32 h-32 mx-auto mb-10 animate-float">
+                <div className="absolute inset-0 bg-primaryGold/20 blur-[40px] rounded-full -z-10"></div>
+                <img src="/web-app-manifest-512x512.png" alt="Studymi Logo" className="w-full h-full object-contain rounded-2xl drop-shadow-xl" />
+              </div>
 
-              <h2 className="text-2xl font-bold text-deepNavy mb-6">hi friend</h2>
+              <h2 className="text-3xl font-extrabold text-deepNavy mb-6 tracking-tight">hi friend</h2>
 
-              <p className="text-lg text-deepNavy mb-4">we created studymi because learning can be... a lot</p>
-              <p className="text-lg text-steelGray mb-4">sometimes you just need a smarter way to study</p>
-              <p className="text-lg text-steelGray mb-4">
-                whether you're cramming for exams,<br />
-                mastering a new skill,<br />
-                or just curious about the world
-              </p>
+              <div className="space-y-4 max-w-sm mx-auto">
+                <p className="text-lg text-deepNavy font-medium">we created <span className="font-bold text-primaryGold">studymi</span> because learning can be... a lot</p>
+                <p className="text-steelGray leading-relaxed">master any topic with personalized AI study sets, flashcards, and smart quizzes.</p>
+              </div>
 
-              <p className="text-xl font-bold text-deepNavy mt-8 mb-4">we're here for you</p>
-
-              <p className="text-steelGray mt-8">love,</p>
-              <p className="text-2xl font-serif italic text-deepNavy">allen joseph</p>
+              <div className="mt-12 p-6 bg-iceGray/50 rounded-none border border-softBorder">
+                <p className="text-steelGray italic">"be heard. be understood. be better."</p>
+                <p className="text-sm font-bold text-deepNavy mt-2">— allen joseph</p>
+              </div>
             </div>
           )}
 
