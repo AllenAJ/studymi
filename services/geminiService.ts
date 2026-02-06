@@ -68,7 +68,7 @@ async function callGeminiServer(prompt: string, action: string, isGenZ: boolean,
   if (!response.ok) {
     throw new Error(data.error || 'API request failed');
   }
-  return data.result;
+  return data;
 }
 
 // For local development, use browser-side Gemini SDK
@@ -338,9 +338,10 @@ TEXT:
 ${content.substring(0, 15000)}`;
   }
 
-  const data = isProduction
+  const response = isProduction
     ? await callGeminiServer(userPrompt, 'generateStudySet', isGenZ, inlineData)
     : await callGeminiLocal(userPrompt, 'generateStudySet', isGenZ, inlineData);
+  const data = isProduction ? (response as { result: any; traceId?: string }).result : response;
 
   return {
     ...data,
@@ -348,7 +349,8 @@ ${content.substring(0, 15000)}`;
     createdAt: Date.now(),
     type: inputType,
     flashcards: data.flashcards.map((f: any) => ({ ...f, id: crypto.randomUUID() })),
-    quiz: data.quiz.map((q: any) => ({ ...q, id: crypto.randomUUID() }))
+    quiz: data.quiz.map((q: any) => ({ ...q, id: crypto.randomUUID() })),
+    opikTraceId: isProduction ? (response as { traceId?: string }).traceId : undefined,
   };
 };
 
@@ -369,7 +371,12 @@ Did they simplify it correctly? Did they miss key points?
 Provide a score (0-100), constructive feedback, a list of missing concepts, and a corrected simplified version if theirs was inaccurate.
   `;
 
-  return isProduction
+  const response = isProduction
     ? await callGeminiServer(prompt, 'gradeTeachBack', isGenZ)
     : await callGeminiLocal(prompt, 'gradeTeachBack', isGenZ);
+  if (isProduction) {
+    const { result, traceId } = response as { result: TeachBackFeedback; traceId?: string };
+    return { ...result, traceId };
+  }
+  return response as TeachBackFeedback;
 };

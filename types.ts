@@ -30,6 +30,8 @@ export interface StudySet {
   mindMap: MindMapNode;
   createdAt: number;
   type?: InputType;
+  /** Set when generated via server API; used to send user feedback to Opik */
+  opikTraceId?: string;
 }
 
 export interface TeachBackFeedback {
@@ -37,4 +39,6 @@ export interface TeachBackFeedback {
   feedback: string;
   missingConcepts: string[];
   correction: string;
+  /** Set when graded via server API; used to send user feedback to Opik */
+  traceId?: string;
 }

@@ -386,6 +386,7 @@ export default async function handler(req: any, res: any) {
                 success: true,
                 action,
                 outputLength: cleanText.length,
+                outputPreview: cleanText.slice(0, 800),
                 summary: `Generated successfully. Output: ${cleanText.length} chars (~${outputEst} tokens). Input: ~${inputEst} tokens.`,
                 tokenUsage: { input: inputEst, output: outputEst, total: inputEst + outputEst },
             };
@@ -407,7 +408,10 @@ export default async function handler(req: any, res: any) {
             console.warn('Logging failed but processing continued:', logError);
         }
 
-        return res.status(200).json({ result: parsed });
+        return res.status(200).json({
+            result: parsed,
+            traceId: trace?.data?.id ?? undefined,
+        });
 
     } catch (criticalError: any) {
         console.error('CRITICAL SERVER ERROR:', criticalError);

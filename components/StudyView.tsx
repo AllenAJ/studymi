@@ -4,7 +4,8 @@ import { FlashcardView } from './FlashcardView';
 import { QuizView } from './QuizView';
 import { MindMapView } from './MindMapView';
 import { TeachBackView } from './TeachBackView';
-import { ArrowLeft, BookOpen, BrainCircuit, Layers, CheckCircle, GraduationCap, Menu, X, Moon, Sun } from 'lucide-react';
+import { ArrowLeft, BookOpen, BrainCircuit, Layers, CheckCircle, GraduationCap, Menu, X, Moon, Sun, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { submitOpikTraceFeedback } from '../services/supabase';
 import { getVibeString } from '../services/genZUtils';
 
 interface StudyViewProps {
@@ -32,6 +33,8 @@ export const StudyView: React.FC<StudyViewProps> = ({ studySet, onBack }) => {
     }
     return false;
   });
+  const [userRating, setUserRating] = useState<number | null>(null);
+  const [ratingSubmitting, setRatingSubmitting] = useState(false);
 
   // Save to localStorage and apply dark mode
   React.useEffect(() => {
@@ -219,6 +222,43 @@ export const StudyView: React.FC<StudyViewProps> = ({ studySet, onBack }) => {
             {activeTab === 'quiz' && <QuizView questions={studySet.quiz} />}
             {activeTab === 'mindmap' && <MindMapView data={studySet.mindMap} />}
             {activeTab === 'teach' && <TeachBackView studySet={studySet} />}
+
+            {studySet.opikTraceId && (
+              <div className="mt-10 pt-8 border-t border-softBorder dark:border-darkBorder flex items-center gap-4">
+                <span className="text-sm text-steelGray dark:text-darkMuted">Rate this set</span>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    disabled={ratingSubmitting || userRating !== null}
+                    onClick={async () => {
+                      setRatingSubmitting(true);
+                      const { error } = await submitOpikTraceFeedback(studySet.opikTraceId!, 1);
+                      setRatingSubmitting(false);
+                      if (!error) setUserRating(1);
+                    }}
+                    className={`p-2 rounded-none border transition-colors ${userRating === 1 ? 'bg-primaryGold/20 border-primaryGold text-primaryGold' : 'border-softBorder dark:border-darkBorder hover:border-primaryGold text-steelGray dark:text-darkMuted hover:text-primaryGold'} disabled:opacity-60 disabled:cursor-not-allowed`}
+                    title="Good"
+                  >
+                    <ThumbsUp className="w-5 h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    disabled={ratingSubmitting || userRating !== null}
+                    onClick={async () => {
+                      setRatingSubmitting(true);
+                      const { error } = await submitOpikTraceFeedback(studySet.opikTraceId!, 0);
+                      setRatingSubmitting(false);
+                      if (!error) setUserRating(0);
+                    }}
+                    className={`p-2 rounded-none border transition-colors ${userRating === 0 ? 'bg-red-500/20 border-red-500 text-red-500' : 'border-softBorder dark:border-darkBorder hover:border-red-500 text-steelGray dark:text-darkMuted hover:text-red-500'} disabled:opacity-60 disabled:cursor-not-allowed`}
+                    title="Could be better"
+                  >
+                    <ThumbsDown className="w-5 h-5" />
+                  </button>
+                </div>
+                {userRating !== null && <span className="text-sm text-steelGray dark:text-darkMuted">Thanks!</span>}
+              </div>
+            )}
           </div>
         </div>
       </main>

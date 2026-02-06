@@ -165,6 +165,22 @@ export const submitFeedback = async (userId: string, rating: number, text: strin
   return { data, error };
 };
 
+/** Send user rating (1 = thumbs up, 0 = thumbs down) to Opik for a trace. Requires auth. */
+export const submitOpikTraceFeedback = async (traceId: string, value: number, reason?: string) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) return { error: new Error('Not logged in') };
+  const res = await fetch('/api/opik-feedback', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+    body: JSON.stringify({ traceId, name: 'user_rating', value, reason }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    return { error: new Error((err as any).error || 'Failed to submit') };
+  }
+  return {};
+};
+
 export const deleteUserAccount = async () => {
   // Sign out - actual account deletion would need admin API
   const { error } = await supabase.auth.signOut();

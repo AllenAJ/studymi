@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { gradeTeachBack } from '../services/geminiService';
 import { TeachBackFeedback, StudySet } from '../types';
-import { Send, Loader2, AlertCircle, CheckCircle2, MessageSquare } from 'lucide-react';
+import { Send, Loader2, AlertCircle, CheckCircle2, MessageSquare, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { submitOpikTraceFeedback } from '../services/supabase';
 
 interface TeachBackViewProps {
   studySet: StudySet;
@@ -11,6 +12,8 @@ export const TeachBackView: React.FC<TeachBackViewProps> = ({ studySet }) => {
   const [explanation, setExplanation] = useState('');
   const [feedback, setFeedback] = useState<TeachBackFeedback | null>(null);
   const [isGrading, setIsGrading] = useState(false);
+  const [userRating, setUserRating] = useState<number | null>(null);
+  const [ratingSubmitting, setRatingSubmitting] = useState(false);
 
   const handleSubmit = async () => {
     if (!explanation.trim()) return;
@@ -121,13 +124,49 @@ export const TeachBackView: React.FC<TeachBackViewProps> = ({ studySet }) => {
             </div>
           </div>
 
-          <div className="flex justify-center pt-12 pb-8">
+          <div className="flex flex-col items-center gap-8 pt-12 pb-8">
             <button 
-              onClick={() => { setFeedback(null); setExplanation(''); }}
+              onClick={() => { setFeedback(null); setExplanation(''); setUserRating(null); }}
               className="px-10 py-4 rounded-none border-2 border-softBorder dark:border-darkBorder text-deepNavy dark:text-white font-bold hover:bg-deepNavy dark:hover:bg-white hover:text-white dark:hover:text-deepNavy hover:border-deepNavy dark:hover:border-white transition-colors text-lg"
             >
               try another explanation
             </button>
+            {feedback.traceId && (
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-steelGray dark:text-darkMuted">Rate this grading</span>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    disabled={ratingSubmitting || userRating !== null}
+                    onClick={async () => {
+                      setRatingSubmitting(true);
+                      const { error } = await submitOpikTraceFeedback(feedback.traceId!, 1);
+                      setRatingSubmitting(false);
+                      if (!error) setUserRating(1);
+                    }}
+                    className={`p-2 rounded-none border transition-colors ${userRating === 1 ? 'bg-primaryGold/20 border-primaryGold text-primaryGold' : 'border-softBorder dark:border-darkBorder hover:border-primaryGold text-steelGray dark:text-darkMuted hover:text-primaryGold'} disabled:opacity-60 disabled:cursor-not-allowed`}
+                    title="Helpful"
+                  >
+                    <ThumbsUp className="w-5 h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    disabled={ratingSubmitting || userRating !== null}
+                    onClick={async () => {
+                      setRatingSubmitting(true);
+                      const { error } = await submitOpikTraceFeedback(feedback.traceId!, 0);
+                      setRatingSubmitting(false);
+                      if (!error) setUserRating(0);
+                    }}
+                    className={`p-2 rounded-none border transition-colors ${userRating === 0 ? 'bg-red-500/20 border-red-500 text-red-500' : 'border-softBorder dark:border-darkBorder hover:border-red-500 text-steelGray dark:text-darkMuted hover:text-red-500'} disabled:opacity-60 disabled:cursor-not-allowed`}
+                    title="Not helpful"
+                  >
+                    <ThumbsDown className="w-5 h-5" />
+                  </button>
+                </div>
+                {userRating !== null && <span className="text-sm text-steelGray dark:text-darkMuted">Thanks!</span>}
+              </div>
+            )}
           </div>
         </div>
       )}
