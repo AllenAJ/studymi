@@ -2,13 +2,18 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { StudySet, TeachBackFeedback, InputType } from "../types";
 import { supabase } from "./supabase";
 
-// Check if we're in production (Vercel) or local dev
-const isProduction = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
+// Use server API on production domain, or on localhost when ?useServer=1 (to test Opik locally with `vercel dev`)
+const isProduction =
+  typeof window !== 'undefined' &&
+  ((window.location.hostname === 'www.studymi.xyz' || window.location.hostname === 'studymi.xyz') ||
+   (['localhost', '127.0.0.1'].includes(window.location.hostname) && (window.location.search.includes('useServer=1') || (import.meta as any).env?.VITE_USE_SERVER_API === 'true')));
 
-// Get API key from environment
+// Injected at build time by Vite from .env (GEMINI_API_KEY or VITE_GEMINI_API_KEY)
+const GEMINI_API_KEY_INJECTED = import.meta.env.VITE_GEMINI_API_KEY ?? '';
+
 const getApiKey = () => {
-  return (process.env as any).GEMINI_API_KEY ||
-    (import.meta as any).env?.VITE_GEMINI_API_KEY || '';
+  const key = typeof GEMINI_API_KEY_INJECTED === 'string' ? GEMINI_API_KEY_INJECTED.trim() : '';
+  return key || '';
 };
 
 const BASE_SYSTEM_INSTRUCTION = `
@@ -70,7 +75,9 @@ async function callGeminiServer(prompt: string, action: string, isGenZ: boolean,
 async function callGeminiLocal(prompt: string, action: string, isGenZ: boolean, inlineData?: { mimeType: string; data: string }): Promise<any> {
   const apiKey = getApiKey();
   if (!apiKey) {
-    throw new Error('Gemini API key not configured');
+    throw new Error(
+      'Gemini API key not found. Add GEMINI_API_KEY to your .env file and restart the dev server (npm run dev).'
+    );
   }
 
   const ai = new GoogleGenAI({ apiKey });
@@ -170,6 +177,7 @@ async function callGeminiLocal(prompt: string, action: string, isGenZ: boolean, 
   } else if (cleanText.includes('```')) {
     cleanText = cleanText.replace(/```\n?/, '').replace(/\n?```$/, '');
   }
+  cleanText = cleanText.trim();
 
   // Log usage if logged in
   const { data: { session } } = await supabase.auth.getSession();
@@ -191,7 +199,38 @@ async function callGeminiLocal(prompt: string, action: string, isGenZ: boolean, 
     }
   }
 
-  return JSON.parse(cleanText.trim());
+  try {
+    return JSON.parse(cleanText);
+  } catch (parseErr: any) {
+    if (parseErr instanceof SyntaxError) {
+      const repaired = tryRepairTruncatedJson(cleanText);
+      if (repaired !== null) return repaired;
+      throw new Error(
+        'The AI response was truncated or invalid. Try again with slightly shorter content, or try again in a moment.'
+      );
+    }
+    throw parseErr;
+  }
+}
+
+/** Try to repair JSON truncated mid-string (e.g. hit token limit). */
+function tryRepairTruncatedJson(raw: string): any {
+  if (!raw || raw.length < 10) return null;
+  const suffixes = ['"', '"}', '"]', '"]}', '"]}}', '"}', ']', '}', '}}', ']}', '}]'];
+  for (const suf of suffixes) {
+    try {
+      return JSON.parse(raw + suf);
+    } catch (_) {}
+  }
+  // Try closing open braces by count
+  const open = (raw.match(/\{/g) || []).length - (raw.match(/\}/g) || []).length;
+  const openBracket = (raw.match(/\[/g) || []).length - (raw.match(/\]/g) || []).length;
+  if (open >= 0 && openBracket >= 0) {
+    try {
+      return JSON.parse(raw + '"]'.repeat(openBracket) + '}'.repeat(open));
+    } catch (_) {}
+  }
+  return null;
 }
 
 export const generateStudySet = async (

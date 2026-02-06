@@ -314,7 +314,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
 
         <div className="max-w-[1200px] mx-auto px-6 mt-20 pt-8 border-t border-softBorder flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-bold text-steelGray/40 uppercase tracking-widest">© 2025 POINK TECHNOLOGIES PRIVATE LIMITED</span>
             <span className="text-[10px] font-bold text-steelGray/40 uppercase tracking-widest">by allen joseph</span>
           </div>
         </div>
